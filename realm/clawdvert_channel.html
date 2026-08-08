@@ -255,6 +255,7 @@
     .invite-status{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:999px;background:color-mix(in srgb,var(--amber) 12%,transparent);color:var(--amber);font-size:9px;font-weight:760}
     .invite-status.used{background:color-mix(in srgb,var(--green) 12%,transparent);color:var(--green)}
     .invite-status.expired{background:color-mix(in srgb,var(--muted) 12%,transparent);color:var(--muted)}
+    .invite-status.warn{background:color-mix(in srgb,var(--down) 13%,transparent);color:var(--down)}
     .invite-code{font:9px/1.4 var(--mono);min-height:72px;margin-top:8px}
     .invite-empty{padding:15px 10px 8px;text-align:center}
     .invite-empty-icon{width:38px;height:38px;margin:0 auto 9px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 11%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 27%,var(--line));color:var(--accent);font:760 21px/1 var(--mono)}
@@ -316,14 +317,12 @@
     .view-switch{display:flex;gap:5px;margin-left:auto;margin-right:12px}
     .view-button{height:32px;padding:0 10px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);font-size:10px;font-weight:720;color:var(--soft);display:inline-flex;align-items:center;gap:6px}
     .view-button.active{background:var(--accent-2);color:#fff;border-color:transparent}
-    .arcade-body{padding:20px;overflow:auto;min-height:0;display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px;align-content:start;background:var(--raise-2)}
-    .arcade-intro{grid-column:1/-1;display:flex;align-items:end;justify-content:space-between;gap:20px;padding:4px 2px 2px}
+    .arcade-body{padding:20px;overflow:auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:760px;margin-inline:auto;align-items:start;align-content:start;background:var(--raise-2)}
+    .arcade-intro{grid-column:1/-1;padding:4px 2px 2px}
     .arcade-intro h2{margin:0;font-size:clamp(22px,3vw,34px);letter-spacing:-.05em}
     .arcade-intro h2 span{color:var(--amber)}
     .arcade-intro p{margin:4px 0 0;color:var(--muted);font-size:11px;max-width:540px}
-    .game-card{background:var(--raise-2);border:1px solid rgba(76,131,177,.35);border-radius:18px;padding:16px;box-shadow:inset 0 1px rgba(255,255,255,.025),0 18px 45px rgba(0,0,0,.22);position:relative;overflow:hidden}
-    .game-card:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--raise-2);opacity:.5}
-    .game-card.orange:before{background:var(--raise-2)}
+    .game-card{background:var(--raise);border:1px solid var(--rule);border-radius:16px;padding:20px;box-shadow:none;position:relative;overflow:visible;display:grid;gap:8px}
     .game-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .game-title{font-size:15px;font-weight:780;letter-spacing:-.02em}
     .game-copy{font-size:10.5px;color:var(--muted);margin-top:3px}
@@ -334,25 +333,29 @@
     .ttt-players{display:flex;justify-content:center;gap:8px;font-size:10px;color:var(--muted)}
     .race-stage{text-align:center;padding:20px 0 10px}
     .race-timer{font:800 36px/1 var(--mono);letter-spacing:-.06em}
-    .race-button{width:120px;height:120px;border-radius:50%;margin:15px auto 10px;background:var(--accent);color:#fff;font-weight:850;font-size:17px;box-shadow:0 16px 35px rgba(112,83,213,.35)}
+    .race-button{width:120px;height:120px;border-radius:50%;margin:15px auto 10px;background:var(--live);color:#fff;font-weight:850;font-size:17px}
     .race-button:disabled{filter:grayscale(.7);opacity:.5}
     .score-list{display:flex;flex-direction:column;gap:5px;margin-top:10px}
     .score-row{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;background:var(--panel);font-size:10px}
-    .game-stage{position:relative;display:grid;place-items:center;margin:14px 0 12px;border:1px solid rgba(79,138,186,.4);border-radius:14px;overflow:hidden;background:#050b16;box-shadow:inset 0 0 40px rgba(0,0,0,.45)}
+    .game-stage{position:relative;display:grid;place-items:center;margin:14px 0 12px;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;background:var(--ink)}
     .game-stage canvas{display:block;width:100%;height:auto;aspect-ratio:720/320;touch-action:none}
+    .race-button,.game-key,.game-play,.ttt-cell,.arcade-back,.view-button,#mobileTabs button,.game-card{
+      touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
     .game-hud{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}
     .game-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-    .game-key{min-width:38px;height:36px;padding:0 10px;border-radius:10px;background:#18263a;border:1px solid #304b6a;color:var(--soft);font:760 10px var(--mono)}
-    .game-key.action{background:var(--raise-2);border-color:#18c7ee;color:white}
-    .game-key.orange{background:var(--raise-2);border-color:#ff9d32;color:white}
+    .game-key{min-width:38px;height:36px;padding:0 10px;border-radius:10px;background:var(--raise);border:1px solid var(--rule);color:var(--text);font:760 10px var(--mono)}
+    .game-key.action{background:var(--live);border-color:var(--live);color:#fff}
+    .game-key.cooling{opacity:.4}
     .game-key:disabled{opacity:.38}
     .flappy-scoreboard{display:flex;gap:6px;flex-wrap:wrap;min-height:24px}
-    .score-chip{display:inline-flex;gap:5px;align-items:center;padding:4px 7px;border-radius:999px;background:rgba(7,14,25,.82);border:1px solid var(--line);font-size:9px;color:var(--muted)}
+    .score-chip{display:inline-flex;gap:5px;align-items:center;padding:4px 7px;border-radius:999px;background:var(--ink);border:1px solid var(--rule);font-size:9px;color:var(--dim)}
     .score-chip strong{color:var(--text)}
     .fighter-healths{position:absolute;left:12px;right:12px;top:10px;display:grid;grid-template-columns:1fr 1fr;gap:34px;pointer-events:none}
-    .health{height:9px;background:rgba(2,5,11,.72);border:1px solid rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
-    .health span{display:block;height:100%;background:var(--raise-2);transition:width .15s}
-    .health.right span{margin-left:auto;background:var(--raise-2)}
+    .health{height:9px;background:var(--ink);border:1px solid var(--rule);border-radius:99px;overflow:hidden}
+    .health span{display:block;height:100%;background:var(--live);transition:width .15s,background .2s}
+    .health.right span{margin-left:auto}
+    .health span.hurt{background:var(--wait)}
+    .health span.critical{background:var(--down)}
     /* The arcade takes the whole frame when selected. Sharing the three column
        grid with the sidebar and roster left the canvases about a third of the
        window, and the body could not scroll to the cards below the fold. */
@@ -419,25 +422,44 @@
     .arcade-body:not(.focused) .ttt-players,
     .arcade-body:not(.focused) .race-stage,
     .arcade-body:not(.focused) .score-list,
-    .arcade-body:not(.focused) .flappy-scoreboard{display:none}
-    .arcade-body:not(.focused) .game-card{cursor:pointer;transition:border-color .15s,transform .15s}
+    .arcade-body:not(.focused) .flappy-scoreboard,
+    .arcade-body:not(.focused) #tttReset{display:none}
+    .arcade-body:not(.focused) .game-title-row button{display:none}
+    .arcade-body:not(.focused) .game-state{display:none}
+    .arcade-body:not(.focused) .game-card{cursor:pointer;transition:border-color .15s,transform .15s;
+      grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:16px;padding:16px 18px}
     .arcade-body:not(.focused) .game-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .arcade-body:not(.focused) .deck-mark{grid-column:1;grid-row:1/3;width:62px;height:62px;display:grid;place-items:center;
+      border:1px solid var(--rule);border-radius:13px;background:var(--ink);color:var(--accent)}
+    .arcade-body:not(.focused) .game-title-row{grid-column:2;grid-row:1}
+    .arcade-body:not(.focused) .game-play{grid-column:2;grid-row:2}
+    .arcade-body:not(.focused) .deck-mark svg{width:36px;height:36px}
+    .arcade-body:not(.focused) .game-copy{margin-top:2px}
+    .arcade-body.focused .deck-mark,.arcade-body.focused .deck-meta{display:none}
+    .deck-meta{font:650 9px var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
     .game-play{margin-top:12px;width:100%;height:38px;border-radius:10px;border:1px solid var(--line);
       background:var(--panel-3);color:var(--soft);font-weight:700;font-size:12px}
     .arcade-body.focused .game-play{display:none}
 
     /* Focused: the chosen card is the only thing in the body and fills it. */
-    .arcade-body.focused{grid-template-columns:minmax(0,1fr);align-content:stretch;overflow:hidden}
+    /* On a wide screen the cabinet is a card, not a wall: stretching it to the
+       full body left a game sitting above several hundred pixels of nothing.
+       The phone cabinet still fills, because there the viewport is the frame. */
+    .arcade-body.focused{grid-template-columns:minmax(0,1fr);align-content:start;overflow:auto}
     .arcade-body.focused>:not(.game-card.active){display:none}
-    .arcade-body.focused .game-card.active{display:flex;flex-direction:column;min-height:0;height:100%}
-    .arcade-body.focused .game-stage{flex:0 1 auto;width:100%;aspect-ratio:720/320;max-height:60vh;min-height:0;margin:14px 0 10px}
-    .arcade-body.focused .game-stage canvas{width:auto;height:auto;max-width:100%;max-height:100%;margin:auto}
+    .arcade-body.focused .game-card.active{display:flex;flex-direction:column;min-height:0}
+    .arcade-body.focused .game-stage{flex:0 1 auto;width:100%;max-height:60vh;min-height:0;margin:14px 0 10px}
+        /* The stage is the box fitCanvas measures. Sizing the canvas from its own
+       intrinsic buffer would make the box depend on the buffer that is derived
+       from the box, so it is pinned to the stage and object-fit does the
+       letterboxing. That is what lets the portrait course change shape without
+       the two definitions chasing each other. */
+    .arcade-body.focused .game-stage canvas{width:100%;height:100%;object-fit:contain;margin:auto}
     .arcade-back{display:none;height:32px;padding:0 13px;border-radius:9px;border:1px solid var(--line);
       background:var(--panel-2);color:var(--soft);font-size:12px;font-weight:650}
     .arcade-back.on{display:inline-flex;align-items:center;gap:7px}
-    .classic-grid{padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .portal-wordmark{display:inline-flex;align-items:center;gap:9px;color:var(--muted);font:760 9px var(--mono);text-transform:uppercase;letter-spacing:.12em}
-    .portal-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent),58px 0 14px var(--amber)}
+    .portal-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);}
     .empty-icon.portal-emblem{width:88px;height:62px;border:0;background:transparent;box-shadow:none;border-radius:0;position:relative;color:var(--text);font:850 25px/1 var(--mono);letter-spacing:-.14em;text-shadow:0 0 18px rgba(66,217,255,.45)}
     .empty-icon.portal-emblem:before,.empty-icon.portal-emblem:after{content:"";position:absolute;top:7px;width:16px;height:48px;border:3px solid transparent}
     .empty-icon.portal-emblem:before{left:5px;border-left-color:var(--accent);border-radius:50% 0 0 50%;filter:drop-shadow(0 0 8px rgba(66,217,255,.5))}
@@ -488,14 +510,65 @@
       .app[data-stage="room"][data-mobile="arcade"]>#mobileTabs{display:none}
       .app[data-stage="room"][data-mobile="arcade"] .arcade-body{
         padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+      /* A phone gives the stage whatever is left rather than 60% of the
+         viewport, which is what makes the portrait course worth having. */
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused{align-content:stretch;overflow:hidden}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-card.active{height:100%}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-stage{max-height:100%}
       .app[data-stage="room"][data-mobile="people"]>#peoplePanel{display:block}
       .app[data-stage="room"][data-mobile="room"]>.sidebar{display:flex}
       .app[data-stage="room"]>#mobileTabs{display:flex}
       .app[data-stage="room"][data-mobile="chat"]>#chat{height:calc(100dvh - 60px);min-height:0}
       .app[data-stage="setup"]>.sidebar{width:100%}
-      .sidebar{overflow:visible}.side-scroll{overflow:visible}.chat{height:78vh;min-height:580px;border-bottom:0}.people{max-height:none}.people-scroll{display:flex}.head-route{max-width:45%}.arcade-body{grid-template-columns:1fr}.view-switch{margin-right:0}.guide-columns{grid-template-columns:1fr}.classic-grid{grid-template-columns:1fr}
+      .sidebar{overflow:visible}.side-scroll{overflow:visible}.chat{height:78vh;min-height:580px;border-bottom:0}.people{max-height:none}.people-scroll{display:flex}.head-route{max-width:45%}.arcade-body{grid-template-columns:1fr}.view-switch{margin-right:0}.guide-columns{grid-template-columns:1fr}
+    }
+    /* A phone held sideways has roughly 390px of height and a notch on one
+       edge. The 720x320 stage wants all of it, so in this orientation the
+       chrome collapses to a back button and the controls move to a side rail
+       beside the stage rather than under it. */
+    @media(max-width:920px) and (orientation:landscape){
+      .app[data-stage="room"][data-mobile="arcade"] .chat-head{padding:5px 8px;gap:8px}
+      .app[data-stage="room"][data-mobile="arcade"] .chat-head>.avatar,
+      .app[data-stage="room"][data-mobile="arcade"] .chat-head>div:not(.view-switch){display:none}
+      .app[data-stage="room"][data-mobile="arcade"] .composer-wrap{display:none}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body{
+        padding:6px calc(10px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-title-row{display:none}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-card.active{
+        padding:0;border:0;background:transparent}
+      /* Only the two canvas games get the side rail. Noughts and the race have
+         no stage to put beside it, so they stay a single centred column. */
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused
+        .game-card.active[data-game="flappy"],
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused
+        .game-card.active[data-game="fighter"]{
+        display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-stage{
+        margin:0;max-height:100%;height:100%}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-hud{
+        margin:0;flex-direction:column;align-items:stretch;gap:8px;width:132px}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused .game-controls{
+        display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body.focused
+        .game-controls .game-key.action{grid-column:1/-1}
+      .app[data-stage="room"][data-mobile="arcade"] .game-key{min-height:44px;min-width:0}
+      .app[data-stage="room"][data-mobile="arcade"] .flappy-scoreboard{max-height:38%;overflow:auto}
+      .app[data-stage="room"][data-mobile="arcade"] .ttt-board{width:min(44vh,290px);margin:6px auto}
+      .app[data-stage="room"][data-mobile="arcade"] .race-stage{padding:4px 0 0}
+      .app[data-stage="room"][data-mobile="arcade"] .race-timer{font-size:26px}
+      .app[data-stage="room"][data-mobile="arcade"] .race-button{width:96px;height:96px;margin:8px auto 4px}
     }
     @media(max-width:480px){
+      /* Everything below was 32 to 38px, including the only way into the
+         arcade and the only way out of a game. */
+      .game-key{min-height:56px;min-width:56px}
+      .game-play{min-height:56px}
+      .arcade-back{width:52px;height:52px}
+      .view-button{min-height:44px}
+      #tttReset{min-height:48px}
+      #mobileTabs button{min-height:48px}
+      .arcade-body{padding:12px}
+      .game-controls .code-meta{display:none}
       .brand{padding:14px}.side-scroll{padding:12px}.role-grid{grid-template-columns:1fr}.chat-head{padding:11px 13px}.messages{padding:18px 12px}.bubble{max-width:88%}.head-route{display:none}.composer-wrap{padding:10px}.send{padding:0 13px}.compose-note{display:none}.empty-flow{grid-template-columns:1fr}.empty-arrow{transform:rotate(90deg);text-align:center}.mesh-diagram{grid-template-columns:1fr}.mesh-arrow{transform:rotate(90deg);text-align:center}.guide-modal-body{padding:15px}.guide-modal-head{padding:17px}
     }
   </style>
@@ -745,23 +818,27 @@
     <div class="arcade-body">
       <div class="arcade-intro"><div><div class="portal-wordmark"><span class="portal-dot"></span>peer-synced arcade</div><h2>Enter the <span>Clawdrome</span></h2><p>Inputs and game state ride the room’s existing data channels. If the oldest member leaves, the next-longest-lived browser takes over coordination.</p></div></div>
       <section class="game-card" data-game="flappy">
-        <div class="game-title-row"><div><div class="game-title">Flappy Clawd</div><div class="game-copy">Every online claw flies the same obstacle course.</div><div id="flappyState" class="game-state">Waiting for a room</div></div><button id="flappyStart" class="button secondary" type="button">Launch flock</button></div>
+        <div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M27 3v11h9V3M27 37V26h9v11"/><path d="M15 20l-8-6v12z" fill="currentColor" stroke="none"/></svg></div>
+        <div class="game-title-row"><div><div class="game-title">Flappy Clawd</div><div class="game-copy">Every online claw flies the same obstacle course.</div><div id="flappyState" class="game-state">Waiting for a room</div><div class="deck-meta">Everyone at once &middot; space or tap</div></div><button id="flappyStart" class="button secondary" type="button">Launch flock</button></div>
         <div class="game-stage"><canvas id="flappyCanvas" width="720" height="320" aria-label="Flappy Clawd multiplayer game"></canvas></div>
         <div class="game-hud"><div id="flappyScores" class="flappy-scoreboard"></div><div class="game-controls"><span class="code-meta">SPACE / TAP</span><button id="flappyFlap" class="game-key action" type="button">FLAP</button></div></div>
       </section>
-      <section class="game-card orange" data-game="fighter">
-        <div class="game-title-row"><div><div class="game-title">Clawd Combat</div><div class="game-copy">Two-player portal brawler. Move, guard, and strike.</div><div id="fighterState" class="game-state">Waiting for a room</div></div><button id="fighterJoin" class="button secondary" type="button">Take corner</button></div>
+      <section class="game-card" data-game="fighter">
+        <div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="9" cy="11" r="4"/><path d="M9 16v9M9 19h9M5 35l4-8 4 8"/><circle cx="31" cy="11" r="4"/><path d="M31 16v9M31 19h-9M27 35l4-8 4 8"/></svg></div>
+        <div class="game-title-row"><div><div class="game-title">Clawd Combat</div><div class="game-copy">Two-player portal brawler. Move, guard, and strike.</div><div id="fighterState" class="game-state">Waiting for a room</div><div class="deck-meta">Two players &middot; arrows, guard, strike</div></div><button id="fighterJoin" class="button secondary" type="button">Take corner</button></div>
         <div class="game-stage"><canvas id="fighterCanvas" width="720" height="320" aria-label="Clawd Combat multiplayer fighting game"></canvas><div class="fighter-healths"><div class="health"><span id="fighterHealthLeft" style="width:0%"></span></div><div class="health right"><span id="fighterHealthRight" style="width:0%"></span></div></div></div>
-        <div class="game-hud"><span id="fighterPlayers" class="code-meta">Two corners open</span><div class="game-controls"><button id="fightLeft" class="game-key" type="button" title="Move left">←</button><button id="fightRight" class="game-key" type="button" title="Move right">→</button><button id="fightBlock" class="game-key" type="button">GUARD</button><button id="fightAttack" class="game-key orange" type="button">STRIKE</button><button id="fighterReset" class="game-key" type="button" title="Reset round">↻</button></div></div>
+        <div class="game-hud"><span id="fighterPlayers" class="code-meta">Two corners open</span><div class="game-controls"><button id="fightLeft" class="game-key" type="button" title="Move left">←</button><button id="fightRight" class="game-key" type="button" title="Move right">→</button><button id="fightBlock" class="game-key" type="button">GUARD</button><button id="fightAttack" class="game-key action" type="button">STRIKE</button><button id="fighterReset" class="game-key" type="button" title="Reset round">↻</button></div></div>
       </section>
       <section class="game-card" data-game="ttt">
-        <div class="game-title-row"><div><div class="game-title">Noughts &amp; crosses</div><div class="game-copy">Two players, everyone else spectates.</div><div id="tttState" class="game-state">Waiting for a room</div></div><button id="tttJoin" class="button secondary" type="button">Take seat</button></div>
+        <div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M16 5v30M28 5v30M5 16h30M5 28h30" opacity=".4"/><path d="M7 7l6 6M13 7l-6 6"/><circle cx="34" cy="34" r="4"/></svg></div>
+        <div class="game-title-row"><div><div class="game-title">Noughts &amp; crosses</div><div class="game-copy">Two players, everyone else spectates.</div><div id="tttState" class="game-state">Waiting for a room</div><div class="deck-meta">Two players &middot; the rest spectate</div></div><button id="tttJoin" class="button secondary" type="button">Take seat</button></div>
         <div id="tttBoard" class="ttt-board"></div>
         <div id="tttPlayers" class="ttt-players"></div>
         <button id="tttReset" class="quiet full" type="button">New round</button>
       </section>
       <section class="game-card" data-game="race">
-        <div class="game-title-row"><div><div class="game-title">Pulse race</div><div class="game-copy">Ten seconds. Tap as quickly as you can.</div><div id="raceState" class="game-state">Waiting for a room</div></div><button id="raceStart" class="button secondary" type="button">Start round</button></div>
+        <div class="deck-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="20" cy="20" r="4.5" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="11" opacity=".55"/><circle cx="20" cy="20" r="17" opacity=".25"/></svg></div>
+        <div class="game-title-row"><div><div class="game-title">Pulse race</div><div class="game-copy">Ten seconds. Tap as quickly as you can.</div><div id="raceState" class="game-state">Waiting for a room</div><div class="deck-meta">Everyone at once &middot; ten seconds</div></div><button id="raceStart" class="button secondary" type="button">Start round</button></div>
         <div class="race-stage"><div id="raceTimer" class="race-timer">10.0</div><button id="raceTap" class="race-button" type="button" disabled>Tap</button></div>
         <div id="raceScores" class="score-list"></div>
       </section>
@@ -858,7 +935,7 @@
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const APP = "clawdvert_channel";
-  const VERSION = "0.24.0-arcade-mobile";
+  const VERSION = "0.28.0-rendezvous";
   const CODE_PREFIX = "CC2.";
   const STUN_SERVERS = [
     {name:"Cloudflare",url:"stun:stun.cloudflare.com:3478"},
@@ -1211,7 +1288,41 @@
   // especially with a shared screen. Gentler gravity and a smaller impulse keep
   // the same feel over a longer arc, and the gap is widened because several
   // players fly the same course at once.
+  // A 720x320 course on a phone held upright is a letterbox about a finger
+  // tall. The shape of the course is part of the round rather than a property
+  // of whoever is looking at it, because two clients simulating different
+  // worlds would disagree about every collision. The launcher picks it and
+  // everyone flies the same one; a client that predates this reads no field and
+  // gets the landscape course, which is what it was already drawing.
+  const FLAP_COURSES = {
+    landscape:{w:720,h:320},
+    portrait: {w:400,h:680},
+  };
   const FLAP_GRAVITY = 620, FLAP_IMPULSE = -300, FLAP_GAP = 68;
+
+  // The launcher's own screen picks the course. They are the one who can see
+  // what they are choosing, and it is the choice that most rooms want: one
+  // person on a phone starting a round for a room of phones.
+  function preferredFlappyField(){
+    return window.innerWidth<760&&window.innerHeight>window.innerWidth?"portrait":"landscape";
+  }
+
+  function flappyField(game){
+    const field=(game||state.games.flappy).field;
+    return field&&FLAP_COURSES[field]?FLAP_COURSES[field]:FLAP_COURSES.landscape;
+  }
+
+  // Every constant below was tuned against 720x320, so the course is expressed
+  // as that world scaled rather than as a second set of numbers to keep in
+  // step. Scaling horizontal metrics together keeps the interval between pipes
+  // at 1.4 seconds in both shapes, so the portrait course is the same game.
+  function flappyMetrics(game){
+    const {w,h}=flappyField(game),sx=w/720,sy=h/320;
+    return{w,h,sx,sy,birdX:132*sx,radius:13*sx,pipeW:64*sx,spacing:210*sx,
+      speed:150*sx,firstPipe:760*sx,scoreLine:691*sx,
+      gap:FLAP_GAP*sy,gravity:FLAP_GRAVITY*sy,impulse:FLAP_IMPULSE*sy,
+      gapTop:78*sy,gapRange:164*sy,ground:292*sy};
+  }
   const GAME_NAMES = {flappy:"Flappy Clawd",fighter:"Clawd Combat",ttt:"Noughts & crosses",race:"Pulse race"};
   const FILE_CHUNK_BYTES = 16 * 1024;
   const BUFFER_HIGH_WATER = 4 * 1024 * 1024;
@@ -1223,10 +1334,11 @@
   const MAX_CHANNELS = 12;
   const PRESENCE_INTERVAL_MS = 8000;
   const PRESENCE_STALE_MS = 30000;
+  const MESH_SETUP_TIMEOUT_MS = 25000;
   const ENVELOPE_TTL = 8;
 
   const state = {
-    localId: loadSetting("deviceId") || randomHex(8), relayClientId: randomHex(6), onlineSince: Date.now(),ipVisible:loadSetting("showIp")==="1",
+    localId: loadSetting("deviceId") || randomHex(8), relayClientId: randomHex(6), onlineSince: Date.now(), hiddenAt: 0,ipVisible:loadSetting("showIp")==="1",
     sessionId: "", role: "", mode: "", pc: null, channel: null, activePairSession: "", activeInviteId: "", inviteBusy: false,
     relay: null, relayJoined: false, relayHost: "", relayRoom: "", relayParticipants: 0,
     localName: "Device", peerId: "", peerName: "Peer", connected: false, room: null, activeChannel: "lobby", view: "chat",
@@ -1235,7 +1347,7 @@
     games: {
       ttt:{roundId:"",players:[],board:Array(9).fill(""),turn:0,winner:"",revision:0,updatedAt:0,updatedBy:""},
       race:{roundId:"",startsAt:0,endsAt:0,scores:{},revision:0,updatedAt:0,updatedBy:""},
-      flappy:{roundId:"",seed:0,startsAt:0,status:"idle",players:{},revision:0,updatedAt:0,updatedBy:""},
+      flappy:{roundId:"",seed:0,startsAt:0,status:"idle",field:"landscape",players:{},revision:0,updatedAt:0,updatedBy:""},
       fighter:{roundId:"",players:[],fighters:{},status:"idle",winner:"",revision:0,updatedAt:0,updatedBy:""}
     },
     events: [], route: null, stunCandidate:null, peerStunCandidate:null, endpointDisplay:{local:"Unavailable",remote:"Unavailable",public:"Not gathered",peerPublic:"Not gathered"}, verification: "", bytesSent: 0, bytesReceived: 0,
@@ -1409,17 +1521,40 @@
     $("tttJoin").addEventListener("click", () => sendGameAction("ttt-join"));
     $("tttReset").addEventListener("click", () => sendGameAction("ttt-reset"));
     $("raceStart").addEventListener("click", () => sendGameAction("race-start"));
-    $("raceTap").addEventListener("click", () => sendGameAction("race-hit"));
-    $("flappyStart").addEventListener("click", () => sendGameAction("flappy-start"));
-    $("flappyFlap").addEventListener("click", () => sendGameAction("flappy-flap"));
+    $("flappyStart").addEventListener("click", () =>
+      sendGameAction("flappy-start",{field:preferredFlappyField()}));
     $("flappyCanvas").addEventListener("pointerdown", () => sendGameAction("flappy-flap"));
     $("fighterJoin").addEventListener("click", () => sendGameAction("fighter-join"));
     $("fighterReset").addEventListener("click", () => sendGameAction("fighter-reset"));
-    $("fightLeft").addEventListener("click", () => sendGameAction("fighter-move",{direction:-1}));
-    $("fightRight").addEventListener("click", () => sendGameAction("fighter-move",{direction:1}));
-    $("fightBlock").addEventListener("click", () => sendGameAction("fighter-block"));
-    $("fightAttack").addEventListener("click", () => sendGameAction("fighter-attack"));
+    // Timing controls fire on pointerdown, not click: a touch click lands
+    // roughly 100ms later, which is the difference between clearing a pipe and
+    // not. preventDefault suppresses the synthesized click so the action is not
+    // sent twice, and the separate click listener is what keyboard activation
+    // still comes through. Blurring matters as much as the latency: a button
+    // left focused swallows the next space bar, so after tapping GUARD once the
+    // space bar guarded instead of flapping.
+    for(const [id, action, payload] of [
+      ["raceTap",     "race-hit",      null],
+      ["flappyFlap",  "flappy-flap",   null],
+      ["fightBlock",  "fighter-block", null],
+      ["fightAttack", "fighter-attack",null],
+    ]){
+      const button = $(id), fire = () => sendGameAction(action, payload || undefined);
+      button.addEventListener("pointerdown", event => { event.preventDefault(); button.blur(); fire() });
+      button.addEventListener("click", fire);
+    }
+    // Movement was one step per press, with key repeat suppressed, so crossing
+    // the arena took a dozen deliberate taps. Holding now repeats.
+    holdToRepeat($("fightLeft"),  () => sendGameAction("fighter-move",{direction:-1}));
+    holdToRepeat($("fightRight"), () => sendGameAction("fighter-move",{direction:1}));
     document.addEventListener("keydown",handleArcadeKey);
+    document.addEventListener("keyup",event=>{
+      if(event.key==="ArrowLeft"||event.key.toLowerCase()==="a")releaseMove("left");
+      if(event.key==="ArrowRight"||event.key.toLowerCase()==="d")releaseMove("right");
+    });
+    // A key held while the tab loses focus never gets its keyup, and the
+    // fighter walks into the wall until you come back.
+    window.addEventListener("blur",()=>releaseMove());
     // Nothing in this file listened for a resize, so a rotated phone kept a
     // stale bitmap at the old size. Re-fit without disturbing game state.
     let refitPending = 0;
@@ -1430,7 +1565,19 @@
         if(state.view === "arcade") renderGames(true);
       });
     });
-    window.addEventListener("beforeunload", closeConnection);
+    // beforeunload was the whole mobile lifecycle story here, and it is the wrong
+    // event. iOS freezes a backgrounded page rather than unloading it, so
+    // switching apps fires nothing: the page stops, the OS kills the transport,
+    // and channel.onclose runs on the way back in. What we can do is make sure
+    // nothing is lost on the way out and nothing is destroyed on the way back.
+    window.addEventListener("pagehide", event => {
+      persistRoomStateNow();
+      if(!event.persisted) closeConnection();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if(document.visibilityState === "hidden"){ state.hiddenAt = Date.now(); persistRoomStateNow(); return }
+      onPageResumed();
+    });
     renderIpVisibility();
   }
 
@@ -1840,6 +1987,13 @@
 
   async function copyActiveInvite(){
     const invite=state.invites.find(item=>item.id===state.activeInviteId);if(!invite)return;
+    // An invite owns one peer connection. Once that is gone the code still looks
+    // valid for its full 24 hours and the other side will still accept it, walk
+    // the whole join, and produce an answer nobody can consume. Say so here
+    // rather than spending someone else's time finding out.
+    if(invite.status==="expired"||invite.status==="used"){
+      toast("That code is used up. Create a new invite to send.","warn");return;
+    }
     try{await navigator.clipboard.writeText(invite.code);temporaryLabel($("copyInvite"),"Copied")}
     catch{$("inviteOutput").focus();$("inviteOutput").select();temporaryLabel($("copyInvite"),"Selected")}
   }
@@ -1880,6 +2034,10 @@
     clearTimeout(conn.routeTimer);
     conn.routeTimer = setTimeout(() => {
       if(["connected","completed"].includes(pc.iceConnectionState))return;
+      // A rendezvous connection is deliberately idle until the agreed start,
+      // which is well past twenty seconds. Reporting no route here would be
+      // announcing a failure that has not happened yet.
+      if(String(conn.role||"").startsWith("rendezvous"))return;
       const relayed = conn.sawRelayCandidate ? "" :
         " No relay candidates were offered, so there is no route when both sides are behind NAT that will not hole punch.";
       logEvent("No route found after 20s (ICE "+pc.iceConnectionState+")."+relayed+
@@ -1939,7 +2097,7 @@
   // the context to match, which leaves all the drawing code below free to keep
   // using 720x320 logical units exactly as written.
   const CANVAS_W = 720, CANVAS_H = 320;
-  function fitCanvas(canvas){
+  function fitCanvas(canvas,worldW=CANVAS_W,worldH=CANVAS_H){
     let ctx;
     try{ ctx = canvas && canvas.getContext && canvas.getContext("2d") }catch{ return null }
     if(!ctx) return null;
@@ -1950,11 +2108,11 @@
     // to whatever shape the box happened to be: at 390x844 that was a 3.2x
     // vertical stretch, and the object-fit:contain meant to letterbox it could
     // never fire, because a bitmap measured from the box already matches it.
-    const boxW = rect.width || CANVAS_W;
-    const boxH = rect.height || CANVAS_H;
-    const scale = Math.min(boxW / CANVAS_W, boxH / CANVAS_H) * dpr;
-    const wantW = Math.max(1, Math.round(CANVAS_W * scale));
-    const wantH = Math.max(1, Math.round(CANVAS_H * scale));
+    const boxW = rect.width || worldW;
+    const boxH = rect.height || worldH;
+    const scale = Math.min(boxW / worldW, boxH / worldH) * dpr;
+    const wantW = Math.max(1, Math.round(worldW * scale));
+    const wantH = Math.max(1, Math.round(worldH * scale));
     // Assigning width or height clears the canvas, so only do it on a change.
     if(canvas.width !== wantW || canvas.height !== wantH){
       canvas.width = wantW; canvas.height = wantH;
@@ -2366,6 +2524,9 @@
   function onChannelOpen(conn){
     if(conn.closed)return;
     clearTimeout(conn.setupTimer);state.pendingMesh.delete(conn.expectedPeerId);
+    meshRetry.delete(conn.expectedPeerId);meshRetry.delete(conn.peerId);
+    closeRendezvous("");
+    resetRendezvousBackoff();
     conn.openedAt=Date.now();
     state.connected = true;
     $("startCard").hidden = true;
@@ -2793,7 +2954,7 @@
     state.games={
       ttt:{roundId:"",players:[],board:Array(9).fill(""),turn:0,winner:"",revision:0,updatedAt:0,updatedBy:""},
       race:{roundId:"",startsAt:0,endsAt:0,scores:{},revision:0,updatedAt:0,updatedBy:""},
-      flappy:{roundId:"",seed:0,startsAt:0,status:"idle",players:{},revision:0,updatedAt:0,updatedBy:""},
+      flappy:{roundId:"",seed:0,startsAt:0,status:"idle",field:"landscape",players:{},revision:0,updatedAt:0,updatedBy:""},
       fighter:{roundId:"",players:[],fighters:{},status:"idle",winner:"",revision:0,updatedAt:0,updatedBy:""}
     };
     state.flappyTickAt=0;state.flappyBroadcastAt=0;renderUnread();
@@ -2811,7 +2972,9 @@
     $("secureDot").classList.toggle("on",directReady());
     setTransportDiagnostic("Direct WebRTC mesh","Cloudflare + Google STUN · no TURN");
     renderStunTiming(null);
-    setStatus(restored?"Room restored on this device":"Room open on this device","connected");
+    // Restoring a room restores messages, not links. Saying "connected" here is
+    // where the user starts believing they are in the chat.
+    setStatus(restored?"Room restored · not connected to anyone":"Room open on this device",restored?"warn":"connected");
     clearInterval(state.presenceTimer);
     state.presenceTimer=setInterval(()=>{
       if(state.mode!=="direct"||!state.room)return;
@@ -2830,12 +2993,27 @@
     resetConnection(reason||"Left room");
   }
 
+  // A full JSON.stringify of the room plus 200 messages, committed
+  // synchronously to localStorage ten to twenty times a second, is that many
+  // blocking main thread disk writes inside the frame budget. Coalesce them.
+  let persistTimer = 0;
   function persistRoomState(){
+    if(persistTimer) return;
+    persistTimer = setTimeout(() => { persistTimer = 0; persistRoomStateNow() }, 2500);
+  }
+
+  function persistRoomStateNow(){
+    clearTimeout(persistTimer); persistTimer = 0;
     if(state.mode!=="direct"||!state.room)return;
     const payload={
       v:1,savedAt:Date.now(),room:state.room,activeChannel:state.activeChannel,
       channels:[...state.channels.values()],messages:[...state.messages.values()].sort((a,b)=>a.time-b.time).slice(-MAX_HISTORY),
-      games:state.games,invites:state.invites.slice(0,8),activeInviteId:state.activeInviteId
+      games:state.games,invites:state.invites.slice(0,8),activeInviteId:state.activeInviteId,
+      // The wire snapshot (createRoomSnapshot) has carried members all along, but
+      // it travels over an open data channel, so it can never help a cold start.
+      // Without this a restored device knows the room, the history and the games,
+      // and does not know that anyone else exists.
+      members:[...state.members.values()].slice(0,MAX_DIRECT_PCS*2)
     };
     try{localStorage.setItem(APP+":roomState",JSON.stringify(payload))}catch(error){logEvent("Room state could not be saved: "+messageOf(error),"warn")}
   }
@@ -2853,6 +3031,15 @@
     if(saved.games&&saved.games.race)mergeGameState({game:"race",state:saved.games.race},false);
     if(saved.games&&saved.games.flappy)mergeGameState({game:"flappy",state:saved.games.flappy},false);
     if(saved.games&&saved.games.fighter)mergeGameState({game:"fighter",state:saved.games.fighter},false);
+    // lastSeen 0, deliberately: these are people the room remembers, not people
+    // it can currently reach. onlineMembers still hides them, so nothing claims
+    // they are present; ensureFullMesh can now see them and try.
+    for(const item of Array.isArray(saved.members)?saved.members.slice(0,MAX_DIRECT_PCS*2):[]){
+      const member=sanitiseMember(item);
+      if(member&&member.id!==state.localId)state.members.set(member.id,{...member,lastSeen:0});
+    }
+    if(room.ownerId&&room.ownerId!==state.localId&&!state.members.has(room.ownerId))
+      state.members.set(room.ownerId,{id:room.ownerId,name:"Member",onlineSince:room.createdAt,lastSeen:0,joinedAt:room.createdAt});
     state.invites=(Array.isArray(saved.invites)?saved.invites:[]).map(sanitiseInvite).filter(Boolean).map(item=>item.status==="pending"||item.status==="connecting"?{...item,status:"expired"}:item).slice(0,8);
     state.activeInviteId=state.invites.some(item=>item.id===saved.activeInviteId)?saved.activeInviteId:(state.invites[0]&&state.invites[0].id)||"";
     state.activeChannel=state.channels.has(saved.activeChannel)?saved.activeChannel:"lobby";
@@ -2992,9 +3179,15 @@
     $("memberCount").textContent=members.length+" online";$("metricMembers").textContent=String(members.length);$("metricLinks").textContent=String(links);
     $("metricUptime").textContent=state.room?formatDuration(Date.now()-state.room.createdAt,true):"—";
     $("peopleSubtitle").textContent=state.room?state.room.name+" · "+members.length+" online":"No direct room open";
-    $("meshHealth").textContent=!state.room?"Offline":needed===0?"Room local":links>=needed?"Full mesh":links+" / "+needed+" linked";
-    $("meshHealth").classList.toggle("used",Boolean(state.room&&(needed===0||links>=needed)));
-    if(state.room)$("chatStatus").textContent=members.length+" online · "+(links?links+" direct link"+(links===1?"":"s"):"waiting for a peer");
+    // "Room local" with needed===0 rendered green, so a device that had lost every
+    // link scored as the healthiest state the app can show. Being alone is not a
+    // form of health, and this is the one place the user looks to find out.
+    $("meshHealth").textContent=!state.room?"Offline":links?(links>=needed?"Full mesh":links+" / "+needed+" linked"):"Not connected";
+    $("meshHealth").classList.toggle("used",Boolean(state.room&&links&&links>=needed));
+    $("meshHealth").classList.toggle("warn",Boolean(state.room&&!links));
+    if(state.room)$("chatStatus").textContent=links
+      ? members.length+" online · "+links+" direct link"+(links===1?"":"s")
+      : "Not connected · nothing you send here is leaving this device";
   }
 
   function updateLiveUi(){
@@ -3043,7 +3236,14 @@
         : "No relay route in this code. Discovery did not reach the relay, so this will "
           + "not connect across networks. Press New invite to gather again.";
       relayNote.className="route-note "+(active.carriesRelay?"good":"bad");
-      status.textContent=active.status==="used"?"Connected to "+(active.usedName||"member"):active.status==="expired"?"Invite expired":active.status==="connecting"?"Answer accepted · connecting":"Ready · expires in "+remaining;
+      // A spent code is still copyable and still looks fine, and the other side
+      // will accept it for its full 24 hours before failing. Take it away.
+      const spent=active.status==="expired"||active.status==="used";
+      $("copyInvite").disabled=spent;
+      $("copyInvite").textContent=spent?"Code used up":"Copy invite";
+      const liveLink=active.usedBy&&state.peerLinks.get(active.usedBy);
+      const stillUp=Boolean(liveLink&&liveLink.channel&&liveLink.channel.readyState==="open");
+      status.textContent=active.status==="used"?(stillUp?"Connected to "+(active.usedName||"member"):"Disconnected from "+(active.usedName||"member")):active.status==="expired"?"Invite expired":active.status==="connecting"?"Answer accepted · connecting":"Ready · expires in "+remaining;
       status.className="invite-status"+(active.status==="used"?" used":active.status==="expired"?" expired":"");
       const awaiting=active.status==="pending";$("inviteAnswer").disabled=!awaiting;$("acceptInviteAnswer").disabled=!awaiting;
     }
@@ -3168,23 +3368,84 @@
     if(state.seen.size>1500){const remove=[...state.seen.keys()].slice(0,state.seen.size-1200);for(const key of remove)state.seen.delete(key)}
   }
 
+  // The pattern from the answer path: never close a connection whose ICE has come
+  // up. The mesh setup timers were written without it, which matters most on a
+  // resume, when every deadline that passed during the freeze lands at once.
+  function closeUnlessLive(conn,reason){
+    if(!conn||conn.closed)return;
+    const ice=conn.pc?conn.pc.iceConnectionState:"";
+    if(ice==="connected"||ice==="completed")return;
+    closePeerConnection(conn,reason);
+  }
+
+  // A frozen tab does not run its timers, it banks them. Coming back, a link that
+  // was negotiating when the phone went into a pocket is judged against a
+  // deadline that expired while nothing was running. Give those deadlines the
+  // time they were meant to measure.
+  function onPageResumed(){
+    const away = state.hiddenAt ? Date.now() - state.hiddenAt : 0;
+    state.hiddenAt = 0;
+    if(away < 1000) return;
+    for(const conn of state.connections.values()){
+      if(conn.closed || !conn.setupTimer) continue;
+      clearTimeout(conn.setupTimer);
+      conn.setupTimer = setTimeout(() => closeUnlessLive(conn,"Setup timed out"), MESH_SETUP_TIMEOUT_MS);
+    }
+    if(state.mode !== "direct" || !state.room) return;
+    logEvent("Resumed after "+formatDuration(away)+" in the background");
+    meshRetry.clear();
+    resetRendezvousBackoff();
+    emitMesh("presence",selfMember());
+    renderAllRoomUi();
+    ensureFullMesh();
+  }
+
   function openLinks(){return [...state.connections.values()].filter(conn=>!conn.closed&&conn.channel&&conn.channel.readyState==="open")}
+
+  // onlineMembers drops anyone unheard from for PRESENCE_STALE_MS, which is the
+  // right rule for a roster and the wrong one for repair: thirty seconds after a
+  // phone goes into a pocket the peer stops existing, so the retry loop has
+  // nobody to retry. This set is everyone the room knows about, present or not.
+  function knownMembers(){
+    return [...state.members.values()].filter(member=>member.id!==state.localId);
+  }
+
+  // Retrying a member who is genuinely gone builds a PeerConnection, gathers ICE
+  // and waits 25 seconds, every 8 seconds, forever. Back off instead.
+  const MESH_RETRY_BASE_MS = 8000, MESH_RETRY_MAX_MS = 120000;
+  const meshRetry = new Map();
+  function meshRetryReady(id){
+    const entry=meshRetry.get(id);
+    return !entry||Date.now()>=entry.at;
+  }
+  function meshRetryScheduled(id){
+    const tries=((meshRetry.get(id)||{}).tries||0)+1;
+    meshRetry.set(id,{tries,at:Date.now()+Math.min(MESH_RETRY_MAX_MS,MESH_RETRY_BASE_MS*2**(tries-1))});
+  }
 
   function ensureFullMesh(){
     if(state.mode!=="direct"||!state.room)return;
-    for(const member of onlineMembers()){
-      if(member.id===state.localId||state.localId>member.id||state.pendingMesh.has(member.id))continue;
+    for(const member of knownMembers()){
+      // The lower id offers. Both sides run this over the same set, so exactly
+      // one of any pair initiates and glare never arises.
+      if(state.localId>member.id||state.pendingMesh.has(member.id))continue;
       const link=state.peerLinks.get(member.id);if(link&&link.channel&&link.channel.readyState==="open")continue;
+      if(!meshRetryReady(member.id))continue;
       if(state.connections.size>=MAX_DIRECT_PCS)break;
+      meshRetryScheduled(member.id);
       createMeshOffer(member.id).catch(error=>{state.pendingMesh.delete(member.id);logEvent("Could not link to "+member.name+": "+messageOf(error),"warn")});
     }
+    // A mesh offer needs an open data channel to travel over. With none left
+    // there is nothing to carry it, however many times we retry, so the relay
+    // has to do the introduction instead.
+    if(!openLinks().length)ensureRendezvous();
   }
 
   async function createMeshOffer(targetId){
     if(state.pendingMesh.has(targetId))return;state.pendingMesh.add(targetId);
     const member=state.members.get(targetId),session=randomHex(10),conn=makePeerConnection({session,role:"mesh-offerer",expectedPeerId:targetId,expectedPeerName:member&&member.name});
     try{
-      conn.setupTimer=setTimeout(()=>closePeerConnection(conn,"Mesh setup timed out"),25000);
+      conn.setupTimer=setTimeout(()=>closeUnlessLive(conn,"Mesh setup timed out"),MESH_SETUP_TIMEOUT_MS);
       const channel=conn.pc.createDataChannel(APP,{ordered:true});bindDataChannel(conn,channel);
       await conn.pc.setLocalDescription(await conn.pc.createOffer());await waitForIce(conn.pc);requireIceCandidates(conn.pc.localDescription.sdp,"This browser");
       emitMesh("signal-offer",{session,roomId:state.room.id,sdp:conn.pc.localDescription.sdp},targetId);
@@ -3198,7 +3459,7 @@
     let conn=state.connections.get(value.session);
     if(!conn){
       const member=state.members.get(envelope.from);conn=makePeerConnection({session:value.session,role:"mesh-answerer",expectedPeerId:envelope.from,expectedPeerName:member&&member.name});
-      conn.setupTimer=setTimeout(()=>closePeerConnection(conn,"Mesh setup timed out"),25000);
+      conn.setupTimer=setTimeout(()=>closeUnlessLive(conn,"Mesh setup timed out"),MESH_SETUP_TIMEOUT_MS);
       await conn.pc.setRemoteDescription({type:"offer",sdp:value.sdp});await conn.pc.setLocalDescription(await conn.pc.createAnswer());await waitForIce(conn.pc);requireIceCandidates(conn.pc.localDescription.sdp,"This browser");
       emitMesh("signal-answer",{session:value.session,roomId:state.room.id,sdp:conn.pc.localDescription.sdp},envelope.from);
       logEvent("Returned a routed mesh answer to "+cleanName(member&&member.name||"member"));
@@ -3273,7 +3534,12 @@
     if(invite){
       const wasActive = invite.id===state.activeInviteId;
       invite.status="expired";
-      if(wasActive && reason!=="Superseded invite" && !state.inviteBusy){
+      // Not while the page is away or has just come back. A transport that died
+      // in the background is not a code the user typed wrong, and telling them
+      // their code is spent every time they switch apps is what trained them to
+      // keep re-inviting in the first place.
+      const backgrounded = document.visibilityState === "hidden" || state.hiddenAt > 0;
+      if(wasActive && reason!=="Superseded invite" && !state.inviteBusy && !backgrounded){
         // Deferred so this runs after the current teardown finishes, and
         // re-checked then: by that point leaving the room has cleared the room.
         setTimeout(()=>{
@@ -3323,14 +3589,19 @@
     const coordinator=gameCoordinator();if(!coordinator)return;
     const payload={action,createdAt:Date.now()};
     if(Number.isInteger(detail))payload.index=detail;
-    else if(detail&&typeof detail==="object"){if(detail.direction===-1||detail.direction===1)payload.direction=detail.direction}
+    else if(detail&&typeof detail==="object"){
+      // A whitelist rather than a spread: this payload is what a peer's
+      // coordinator acts on, so only fields with a checked shape go out.
+      if(detail.direction===-1||detail.direction===1)payload.direction=detail.direction;
+      if(FLAP_COURSES[detail.field])payload.field=detail.field;
+    }
     // Predict a flap locally so the bird answers the key immediately. Without
     // this every non-coordinator player waits a full round trip to see their
     // own input, which on a flappy clone is the difference between playable and
     // not. The next coordinator broadcast is authoritative and overwrites it.
     if(action==="flappy-flap"&&coordinator.id!==state.localId){
       const me=state.games.flappy.players[state.localId];
-      if(me&&me.alive&&(state.games.flappy.status==="countdown"||state.games.flappy.status==="running"))me.vy=FLAP_IMPULSE;
+      if(me&&me.alive&&(state.games.flappy.status==="countdown"||state.games.flappy.status==="running"))me.vy=flappyMetrics().impulse;
     }
     if(coordinator.id===state.localId)handleGameAction(state.localId,payload);else emitMesh("game-action",payload,coordinator.id);
   }
@@ -3343,11 +3614,12 @@
       const game=state.games.flappy;
       if(value.action==="flappy-start"){
         const seedBytes=new Uint32Array(1);crypto.getRandomValues(seedBytes);const players={};let slot=0;
-        for(const member of onlineMembers().slice(0,16))players[member.id]={y:148+(slot++%4)*8,vy:0,score:0,alive:true};
-        Object.assign(game,{roundId:randomHex(6),seed:seedBytes[0],startsAt:now+1600,status:"countdown",players});state.flappyTickAt=now;state.flappyBroadcastAt=0;
+        const field=FLAP_COURSES[value.field]?value.field:"landscape",start=FLAP_COURSES[field].h*.4625;
+        for(const member of onlineMembers().slice(0,16))players[member.id]={y:start+(slot++%4)*8,vy:0,score:0,alive:true};
+        Object.assign(game,{roundId:randomHex(6),seed:seedBytes[0],startsAt:now+1600,status:"countdown",field,players});state.flappyTickAt=now;state.flappyBroadcastAt=0;
       }else if(value.action==="flappy-flap"){
         const player=game.players[senderId];if(!player||!player.alive||(game.status!=="countdown"&&game.status!=="running"))return;
-        player.vy=FLAP_IMPULSE;
+        player.vy=flappyMetrics(game).impulse;
       }else return;
       touchGame(game);broadcastGameState("flappy");return;
     }
@@ -3363,12 +3635,27 @@
         const opponentId=game.players.find(id=>id!==senderId),opponent=game.fighters[opponentId];if(!opponent)return;
         if(value.action==="fighter-move"){
           const direction=value.direction===-1?-1:value.direction===1?1:0;if(!direction)return;
-          fighter.x=Math.max(.07,Math.min(.93,fighter.x+direction*.055));fighter.facing=opponent.x>=fighter.x?1:-1;opponent.facing=fighter.x>=opponent.x?1:-1;
+          // Guarding roots you. Otherwise the dominant line was to hold guard
+          // and walk, which nothing could answer.
+          if(fighter.guardUntil>now)return;
+          fighter.x=Math.max(.07,Math.min(.93,fighter.x+direction*.028));fighter.facing=opponent.x>=fighter.x?1:-1;opponent.facing=fighter.x>=opponent.x?1:-1;
         }else if(value.action==="fighter-block"){
-          fighter.blockUntil=now+700;fighter.lastAction="block";
+          // The old guard was a 700ms window on no cooldown, so holding the key
+          // made you permanently guarded and dropped a strike from 14 damage to
+          // 3. Simulated against an opponent striking on cooldown, that turned
+          // a 3.0 second kill into 13.9. Guard is now a window followed by a
+          // longer recovery, capping its uptime at 40% of the round: the same
+          // matchup resolves in 4.2 seconds, so timing a guard is worth about
+          // 40% more survival and holding it is worth nothing.
+          if(now<fighter.guardReadyAt||fighter.guardUntil>now)return;
+          fighter.guardUntil=now+GUARD_WINDOW;fighter.guardReadyAt=now+GUARD_WINDOW+GUARD_COOLDOWN;fighter.lastAction="block";
         }else if(value.action==="fighter-attack"){
-          if(now-fighter.lastAttackAt<420)return;fighter.lastAttackAt=now;fighter.lastAction="attack";
-          if(Math.abs(fighter.x-opponent.x)<=.22){const guarded=opponent.blockUntil>now,damage=guarded?3:14;opponent.hp=Math.max(0,opponent.hp-damage);opponent.x=Math.max(.07,Math.min(.93,opponent.x+(opponent.x>=fighter.x?1:-1)*(guarded?.025:.065)));if(!opponent.hp){game.status="ended";game.winner=senderId}}
+          if(now-fighter.lastAttackAt<ATTACK_COOLDOWN)return;fighter.lastAttackAt=now;fighter.lastAction="attack";
+          if(Math.abs(fighter.x-opponent.x)>ATTACK_REACH)return;
+          const guarded=opponent.guardUntil>now,damage=guarded?2:14;
+          opponent.hp=Math.max(0,opponent.hp-damage);
+          opponent.x=Math.max(.07,Math.min(.93,opponent.x+(opponent.x>=fighter.x?1:-1)*(guarded?.025:.065)));
+          if(!opponent.hp){game.status="ended";game.winner=senderId}
         }else return;
       }
       touchGame(game);broadcastGameState("fighter");return;
@@ -3410,7 +3697,7 @@
   }
 
   function touchGame(game){game.revision=(Number(game.revision)||0)+1;game.updatedAt=Date.now();game.updatedBy=state.localId}
-  function broadcastGameState(game,persist=true){emitMesh("game-state",{game,state:state.games[game]});if(state.view==="arcade")renderGames();if(persist)persistRoomState()}
+  function broadcastGameState(game,persist=true){emitMesh("game-state",{game,state:state.games[game]});if(persist)persistRoomState()}
 
   function mergeGameState(value,paint=true){
     if(!value||!["ttt","race","flappy","fighter"].includes(value.game)||!value.state)return false;
@@ -3421,7 +3708,7 @@
     if(incoming.revision===current.revision&&(incoming.updatedAt<current.updatedAt||(incoming.updatedAt===current.updatedAt&&incoming.updatedBy<=current.updatedBy)))return false;
     // An authoritative update resets the prediction clock, so local integration
     // resumes from the coordinator's positions rather than compounding drift.
-    state.games[value.game]=incoming;if(value.game==="flappy"){state.flappyTickAt=Date.now();state.flappyPredictAt=Date.now()}if(paint){if(state.view==="arcade")renderGames();persistRoomState()}return true;
+    state.games[value.game]=incoming;if(value.game==="flappy"){state.flappyTickAt=Date.now();state.flappyPredictAt=Date.now()}if(paint){persistRoomState()}return true;
   }
 
   function sanitiseTtt(value){
@@ -3441,21 +3728,31 @@
     if(!value||typeof value.players!=="object"||Array.isArray(value.players))return null;
     const players={};for(const [id,player] of Object.entries(value.players).slice(0,16)){
       if(!/^[a-f0-9]{16}$/.test(id)||!player||typeof player!=="object")continue;
-      players[id]={y:Math.max(-80,Math.min(400,Number(player.y)||0)),vy:Math.max(-1200,Math.min(1200,Number(player.vy)||0)),score:Math.max(0,Math.min(9999,Math.floor(Number(player.score)||0))),alive:Boolean(player.alive)};
+      players[id]={y:Math.max(-80,Math.min(FLAP_COURSES.portrait.h+80,Number(player.y)||0)),vy:Math.max(-2600,Math.min(2600,Number(player.vy)||0)),score:Math.max(0,Math.min(9999,Math.floor(Number(player.score)||0))),alive:Boolean(player.alive)};
     }
     const statuses=["idle","countdown","running","ended"],status=statuses.includes(value.status)?value.status:"idle";
-    return{roundId:/^[a-f0-9]{12}$/.test(String(value.roundId||""))?String(value.roundId):"",seed:(Number(value.seed)>>>0),startsAt:numberTime(value.startsAt||0),status,players,revision:Math.max(0,Math.floor(Number(value.revision)||0)),updatedAt:numberTime(value.updatedAt||0),updatedBy:/^[a-f0-9]{16}$/.test(String(value.updatedBy||""))?String(value.updatedBy):""};
+    // A named course rather than a width and a height. Accepting numbers from a
+    // peer would let one of them hand everyone else a one-pixel-tall world.
+    const field=FLAP_COURSES[value.field]?String(value.field):"landscape";
+    return{roundId:/^[a-f0-9]{12}$/.test(String(value.roundId||""))?String(value.roundId):"",seed:(Number(value.seed)>>>0),startsAt:numberTime(value.startsAt||0),status,field,players,revision:Math.max(0,Math.floor(Number(value.revision)||0)),updatedAt:numberTime(value.updatedAt||0),updatedBy:/^[a-f0-9]{16}$/.test(String(value.updatedBy||""))?String(value.updatedBy):""};
   }
 
   function sanitiseFighter(value){
     if(!value||!Array.isArray(value.players)||typeof value.fighters!=="object"||Array.isArray(value.fighters))return null;
     const players=value.players.filter(id=>/^[a-f0-9]{16}$/.test(String(id))).slice(0,2),fighters={};
-    for(const id of players){const fighter=value.fighters[id];if(!fighter)continue;fighters[id]={x:Math.max(.05,Math.min(.95,Number(fighter.x)||.5)),hp:Math.max(0,Math.min(100,Math.floor(Number(fighter.hp)||0))),facing:Number(fighter.facing)<0?-1:1,blockUntil:numberTime(fighter.blockUntil||0),lastAttackAt:numberTime(fighter.lastAttackAt||0),lastAction:["","block","attack"].includes(fighter.lastAction)?fighter.lastAction:""}}
+    for(const id of players){const fighter=value.fighters[id];if(!fighter)continue;fighters[id]={x:Math.max(.05,Math.min(.95,Number(fighter.x)||.5)),hp:Math.max(0,Math.min(100,Math.floor(Number(fighter.hp)||0))),facing:Number(fighter.facing)<0?-1:1,
+      // blockUntil is what the previous build called this. Reading it keeps a
+      // room with a mixed set of tabs playable instead of leaving one side
+      // permanently unguarded.
+      guardUntil:numberTime(fighter.guardUntil||fighter.blockUntil||0),guardReadyAt:numberTime(fighter.guardReadyAt||0),lastAttackAt:numberTime(fighter.lastAttackAt||0),lastAction:["","block","attack"].includes(fighter.lastAction)?fighter.lastAction:""}}
     const statuses=["idle","waiting","running","ended"],status=statuses.includes(value.status)?value.status:"idle",winner=players.includes(value.winner)?value.winner:"";
     return{roundId:/^[a-f0-9]{12}$/.test(String(value.roundId||""))?String(value.roundId):"",players:players.filter(id=>fighters[id]),fighters,status,winner,revision:Math.max(0,Math.floor(Number(value.revision)||0)),updatedAt:numberTime(value.updatedAt||0),updatedBy:/^[a-f0-9]{16}$/.test(String(value.updatedBy||""))?String(value.updatedBy):""};
   }
 
-  function newFighter(index){return{x:index?0.78:0.22,hp:100,facing:index?-1:1,blockUntil:0,lastAttackAt:0,lastAction:""}}
+  // GUARD_WINDOW over GUARD_WINDOW+GUARD_COOLDOWN is the most of a round anyone
+  // can spend guarded, so it is the ceiling on how defensive the game can get.
+  const GUARD_WINDOW=600, GUARD_COOLDOWN=900, ATTACK_COOLDOWN=420, ATTACK_REACH=.13;
+  function newFighter(index){return{x:index?0.78:0.22,hp:100,facing:index?-1:1,guardUntil:0,guardReadyAt:0,lastAttackAt:0,lastAction:""}}
 
   function tttWinner(board){
     const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
@@ -3500,12 +3797,50 @@
     rows.forEach(([id,score],index)=>{const row=element("div","score-row");row.append(element("span","",(index===0&&race.roundId&&!active&&!waiting?"Winner · ":"")+memberName(id)),element("strong","",String(score)));scores.append(row)});
   }
 
+  const MOVE_REPEAT_MS = 90;
+
+  function holdToRepeat(button, fire){
+    let timer = 0;
+    const stop = () => { clearInterval(timer); timer = 0 };
+    button.addEventListener("pointerdown", event => {
+      event.preventDefault(); button.blur(); fire();
+      stop(); timer = setInterval(fire, MOVE_REPEAT_MS);
+      if(button.setPointerCapture) try{ button.setPointerCapture(event.pointerId) }catch(_){}
+    });
+    // pointerleave and blur as well as pointerup: a finger sliding off the
+    // button, or the tab losing focus mid-press, would otherwise leave the
+    // interval running and the fighter walking on its own.
+    for(const name of ["pointerup","pointercancel","pointerleave","blur"])
+      button.addEventListener(name, stop);
+  }
+
+  const heldMove = new Set();
+  let moveTimer = 0;
+  function moveStep(){
+    if(state.view!=="arcade"||!heldMove.size){ releaseMove(); return }
+    const direction = (heldMove.has("right")?1:0) - (heldMove.has("left")?1:0);
+    if(direction) sendGameAction("fighter-move",{direction});
+  }
+  function holdMove(direction){
+    heldMove.add(direction);
+    if(moveTimer) return;
+    moveStep();
+    moveTimer = setInterval(moveStep, MOVE_REPEAT_MS);
+  }
+  function releaseMove(direction){
+    if(direction) heldMove.delete(direction); else heldMove.clear();
+    if(heldMove.size) return;
+    clearInterval(moveTimer); moveTimer = 0;
+  }
+
   function handleArcadeKey(event){
     if(state.view!=="arcade"||event.repeat||event.metaKey||event.ctrlKey||event.altKey)return;
-    const tag=event.target&&event.target.tagName;if(["INPUT","TEXTAREA","SELECT","BUTTON"].includes(tag))return;
+    const tag=event.target&&event.target.tagName;
+    if(["INPUT","TEXTAREA","SELECT"].includes(tag))return;
+    if(tag==="BUTTON"&&(event.code==="Space"||event.key==="Enter"))return;
     if(event.code==="Space"||event.key.toLowerCase()==="w"){event.preventDefault();sendGameAction("flappy-flap");return}
-    if(event.key==="ArrowLeft"||event.key.toLowerCase()==="a"){event.preventDefault();sendGameAction("fighter-move",{direction:-1});return}
-    if(event.key==="ArrowRight"||event.key.toLowerCase()==="d"){event.preventDefault();sendGameAction("fighter-move",{direction:1});return}
+    if(event.key==="ArrowLeft"||event.key.toLowerCase()==="a"){event.preventDefault();holdMove("left");return}
+    if(event.key==="ArrowRight"||event.key.toLowerCase()==="d"){event.preventDefault();holdMove("right");return}
     if(event.key.toLowerCase()==="k"||event.key.toLowerCase()==="f"){event.preventDefault();sendGameAction("fighter-attack");return}
     if(event.key.toLowerCase()==="l"||event.key.toLowerCase()==="g"){event.preventDefault();sendGameAction("fighter-block")}
   }
@@ -3576,10 +3911,11 @@
     const dt=Math.max(0,Math.min(.05,(now-last)/1000));
     state.flappyPredictAt=now;
     if(!dt)return;
+    const metrics=flappyMetrics(game);
     for(const player of Object.values(game.players)){
       if(!player.alive)continue;
-      player.vy+=FLAP_GRAVITY*dt;
-      player.y=Math.max(-40,Math.min(360,player.y+player.vy*dt));
+      player.vy+=metrics.gravity*dt;
+      player.y=Math.max(-40,Math.min(metrics.h+40,player.y+player.vy*dt));
     }
   }
 
@@ -3588,25 +3924,47 @@
     if(now<game.startsAt){state.flappyTickAt=now;return}
     if(game.status==="countdown")game.status="running";
     const dt=Math.max(.01,Math.min(.08,(now-(state.flappyTickAt||now))/1000));state.flappyTickAt=now;
-    const pipes=flappyPipes(game,now),birdX=132,radius=13,travel=Math.max(0,(now-game.startsAt)/1000)*150;
+    const m=flappyMetrics(game),pipes=flappyPipes(game,now),travel=Math.max(0,(now-game.startsAt)/1000)*m.speed;
     let alive=0,ended=false;
     for(const player of Object.values(game.players)){
-      if(!player.alive)continue;alive++;player.vy+=FLAP_GRAVITY*dt;player.y+=player.vy*dt;
-      player.score=Math.max(player.score,Math.max(0,Math.floor((travel-691)/210)+1));
-      if(player.y<radius||player.y>320-radius){player.alive=false;alive--;continue}
-      for(const pipe of pipes){if(pipe.x>birdX+radius||pipe.x+64<birdX-radius)continue;if(player.y-radius<pipe.gapY-FLAP_GAP||player.y+radius>pipe.gapY+FLAP_GAP){player.alive=false;alive--;break}}
+      if(!player.alive)continue;alive++;player.vy+=m.gravity*dt;player.y+=player.vy*dt;
+      player.score=Math.max(player.score,Math.max(0,Math.floor((travel-m.scoreLine)/m.spacing)+1));
+      if(player.y<m.radius||player.y>m.h-m.radius){player.alive=false;alive--;continue}
+      for(const pipe of pipes){if(pipe.x>m.birdX+m.radius||pipe.x+m.pipeW<m.birdX-m.radius)continue;if(player.y-m.radius<pipe.gapY-m.gap||player.y+m.radius>pipe.gapY+m.gap){player.alive=false;alive--;break}}
     }
     if(!alive&&Object.keys(game.players).length){game.status="ended";ended=true}
     if(ended||now-state.flappyBroadcastAt>=100){state.flappyBroadcastAt=now;touchGame(game);broadcastGameState("flappy",ended)}
   }
+
+  // The palette collapsed to eight tokens everywhere except here: the canvas
+  // kept its own hexes, so the arcade was the one surface that ignored the
+  // theme, and its cyan and orange were not in the palette at all. Tokens are
+  // read once and the cache is dropped when the theme changes, because
+  // getComputedStyle inside a frame is a forced style recalculation.
+  let paintCache=null;
+  function paint(){
+    if(paintCache)return paintCache;
+    const css=getComputedStyle(document.documentElement);
+    const read=(name,fallback)=>css.getPropertyValue(name).trim()||fallback;
+    return paintCache={
+      ink:read("--ink","#0c0f0e"),raise:read("--raise","#161a19"),rule:read("--rule","#2a302e"),
+      text:read("--text","#e8e9e6"),dim:read("--dim","#8b918d"),
+      live:read("--live","#00b567"),wait:read("--wait","#d98920"),down:read("--down","#d8412c"),
+    };
+  }
+  new MutationObserver(()=>{paintCache=null}).observe(document.documentElement,{attributeFilter:["data-theme"]});
+  if(window.matchMedia)window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{paintCache=null});
 
   function seededUnit(seed,index){
     let value=(Number(seed)>>>0)^Math.imul(index+1,0x9e3779b1);value^=value>>>16;value=Math.imul(value,0x7feb352d);value^=value>>>15;value=Math.imul(value,0x846ca68b);value^=value>>>16;return(value>>>0)/4294967295;
   }
 
   function flappyPipes(game,now){
-    if(!game.startsAt)return[];const travel=Math.max(0,(now-game.startsAt)/1000)*150,start=Math.max(0,Math.floor((travel-760)/210)-1),pipes=[];
-    for(let index=start;index<start+7;index++)pipes.push({index,x:760+index*210-travel,gapY:78+seededUnit(game.seed,index)*164});
+    if(!game.startsAt)return[];
+    const m=flappyMetrics(game),travel=Math.max(0,(now-game.startsAt)/1000)*m.speed;
+    const start=Math.max(0,Math.floor((travel-m.firstPipe)/m.spacing)-1),pipes=[];
+    for(let index=start;index<start+7;index++)
+      pipes.push({index,x:m.firstPipe+index*m.spacing-travel,gapY:m.gapTop+seededUnit(game.seed,index)*m.gapRange});
     return pipes;
   }
 
@@ -3634,25 +3992,45 @@
     for(const [id,player] of entries.slice(0,8)){const chip=element("span","score-chip");chip.append(element("span","",player.alive?"●":"○"),element("span","",memberName(id)),element("strong","",String(player.score)));scores.append(chip)}
     }
     if(statusOnly)return;
-    const ctx=fitCanvas(canvas);if(!ctx)return;
-    ctx.clearRect(0,0,720,320);const sky=ctx.createLinearGradient(0,0,720,320);sky.addColorStop(0,"#06172a");sky.addColorStop(.52,"#07101f");sky.addColorStop(1,"#190d16");ctx.fillStyle=sky;ctx.fillRect(0,0,720,320);
-    ctx.fillStyle="rgba(255,255,255,.42)";for(let i=0;i<44;i++){const x=(i*137+Number(game.seed||9))%720,y=(i*67+23)%250;ctx.fillRect(x,y,i%7===0?2:1,i%7===0?2:1)}
-    ctx.fillStyle="rgba(28,57,82,.8)";ctx.fillRect(0,292,720,28);ctx.strokeStyle="rgba(66,217,255,.16)";for(let x=0;x<720;x+=36){ctx.beginPath();ctx.moveTo(x,292);ctx.lineTo(x+20,320);ctx.stroke()}
-    for(const pipe of flappyPipes(game,now)){drawPortalColumn(ctx,pipe.x,pipe.gapY-FLAP_GAP,true,pipe.index%2);drawPortalColumn(ctx,pipe.x,pipe.gapY+FLAP_GAP,false,pipe.index%2)}
-    if(!entries.length){drawPortalRing(ctx,360,145,54,"#42d9ff");ctx.fillStyle="#dcecff";ctx.font="700 17px system-ui";ctx.textAlign="center";ctx.fillText("Launch the flock",360,151);return}
-    entries.forEach(([id,player],index)=>{const colour=index%2?"#ff9d32":"#42d9ff";drawFlyingClawd(ctx,132,player.y,colour,!player.alive,index);ctx.fillStyle="rgba(235,246,255,.88)";ctx.font="600 10px system-ui";ctx.textAlign="left";ctx.fillText(memberName(id).slice(0,13),153,player.y+4)});
+    const m=flappyMetrics(game);
+    // The stage is sized by CSS from the same course, so the letterboxing and
+    // the world agree instead of the canvas being stretched into whatever shape
+    // the box happens to be.
+    const ratio=m.w+"/"+m.h,stage=canvas.parentElement;
+    if(stage&&stage.style.aspectRatio!==ratio)stage.style.aspectRatio=ratio;
+    const ctx=fitCanvas(canvas,m.w,m.h);if(!ctx)return;
+    const paints=paint();
+    ctx.clearRect(0,0,m.w,m.h);ctx.fillStyle=paints.ink;ctx.fillRect(0,0,m.w,m.h);
+    ctx.fillStyle=paints.rule;for(let i=0;i<44;i++){const x=(i*137+Number(game.seed||9))%m.w,y=(i*67+23)%(m.ground-42);ctx.fillRect(x,y,i%7===0?2:1,i%7===0?2:1)}
+    ctx.fillStyle=paints.raise;ctx.fillRect(0,m.ground,m.w,m.h-m.ground);ctx.strokeStyle=paints.rule;ctx.lineWidth=1;
+    for(let x=0;x<m.w;x+=36*m.sx){ctx.beginPath();ctx.moveTo(x,m.ground);ctx.lineTo(x+20*m.sx,m.h);ctx.stroke()}
+    for(const pipe of flappyPipes(game,now)){drawPortalColumn(ctx,pipe.x,pipe.gapY-m.gap,true,pipe.index%2,m);drawPortalColumn(ctx,pipe.x,pipe.gapY+m.gap,false,pipe.index%2,m)}
+    if(!entries.length){drawPortalRing(ctx,m.w/2,m.h*.45,54,paints.live);ctx.fillStyle=paints.text;ctx.font="700 17px system-ui";ctx.textAlign="center";ctx.fillText("Launch the flock",m.w/2,m.h*.47);return}
+    entries.forEach(([id,player],index)=>{drawFlyingClawd(ctx,m.birdX,player.y,index%2?paints.wait:paints.live,!player.alive,index,m.sx);ctx.fillStyle=paints.dim;ctx.font="600 10px system-ui";ctx.textAlign="left";ctx.fillText(memberName(id).slice(0,13),m.birdX+21*m.sx,player.y+4)});
   }
 
-  function drawPortalColumn(ctx,x,edge,top,warm){
-    const gradient=ctx.createLinearGradient(x,0,x+64,0);gradient.addColorStop(0,warm?"#9c3d16":"#07587a");gradient.addColorStop(.5,warm?"#ff9d32":"#42d9ff");gradient.addColorStop(1,warm?"#6e210d":"#07334d");ctx.fillStyle=gradient;
-    if(top)ctx.fillRect(x,0,64,Math.max(0,edge));else ctx.fillRect(x,edge,64,Math.max(0,320-edge));ctx.strokeStyle=warm?"rgba(255,184,74,.85)":"rgba(98,232,255,.85)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,edge);ctx.lineTo(x+64,edge);ctx.stroke();
+  function drawPortalColumn(ctx,x,edge,top,warm,m){
+    const paints=paint(),colour=warm?paints.wait:paints.live;
+    const y=top?0:edge,height=Math.max(0,top?edge:m.h-edge);
+    if(!height)return;
+    ctx.save();ctx.globalAlpha=.16;ctx.fillStyle=colour;ctx.fillRect(x,y,m.pipeW,height);ctx.restore();
+    ctx.strokeStyle=colour;ctx.lineWidth=2;ctx.strokeRect(x+1,y-1,m.pipeW-2,height+2);
+    ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,edge);ctx.lineTo(x+m.pipeW,edge);ctx.stroke();
   }
 
-  function drawPortalRing(ctx,x,y,r,colour){ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=7;ctx.shadowColor=colour;ctx.shadowBlur=18;ctx.beginPath();ctx.ellipse(x,y,r*.42,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
 
-  function drawFlyingClawd(ctx,x,y,colour,down,index){
-    ctx.save();ctx.translate(x,y);ctx.rotate(down?.45:Math.sin(Date.now()/150+index)*.06);ctx.shadowColor=colour;ctx.shadowBlur=12;ctx.fillStyle=colour;ctx.beginPath();ctx.ellipse(0,0,16,12,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle="#dff9ff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-11,-7);ctx.lineTo(-19,-15);ctx.moveTo(11,-7);ctx.lineTo(19,-15);ctx.moveTo(-10,8);ctx.lineTo(-18,14);ctx.moveTo(10,8);ctx.lineTo(18,14);ctx.stroke();ctx.fillStyle="#06111c";ctx.beginPath();ctx.arc(5,-3,2,0,Math.PI*2);ctx.fill();ctx.restore();
+  function drawPortalRing(ctx,x,y,r,colour){ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=5;ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(x,y,r*.42,r,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+
+  function drawFlyingClawd(ctx,x,y,colour,down,index,scale=1){
+    const paints=paint();
+    ctx.save();ctx.translate(x,y);ctx.rotate(down?.45:Math.sin(Date.now()/150+index)*.06);ctx.scale(scale,scale);
+    ctx.fillStyle=colour;ctx.beginPath();ctx.ellipse(0,0,16,12,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=paints.text;ctx.lineWidth=2;ctx.beginPath();
+    ctx.moveTo(-11,-7);ctx.lineTo(-19,-15);ctx.moveTo(11,-7);ctx.lineTo(19,-15);
+    ctx.moveTo(-10,8);ctx.lineTo(-18,14);ctx.moveTo(10,8);ctx.lineTo(18,14);ctx.stroke();
+    ctx.fillStyle=paints.ink;ctx.beginPath();ctx.arc(5,-3,2,0,Math.PI*2);ctx.fill();ctx.restore();
   }
+
 
   // Display-only easing. Snaps rather than slides when the gap is large, so a
   // round reset or a fresh join does not send a fighter gliding across the
@@ -3674,26 +4052,54 @@
     $("fighterJoin").disabled=!ready||seat>=0||game.players.length>=2;$("fighterJoin").textContent=seat>=0?"In your corner":game.players.length>=2?"Spectating":"Take corner";$("fighterReset").disabled=!ready;
     for(const id of ["fightLeft","fightRight","fightBlock","fightAttack"])$(id).disabled=!playing;
     if(!ready)$("fighterState").textContent="Waiting for a direct room";else if(game.status==="ended")$("fighterState").textContent=memberName(game.winner)+" wins the round";else if(game.players.length<2)$("fighterState").textContent=game.players.length?memberName(game.players[0])+" awaits a challenger":"Two corners are open";else $("fighterState").textContent=seat>=0?"Arrow keys · K strike · L guard":"Live match · spectating";
-    $("fighterPlayers").textContent=game.players.length?game.players.map((id,index)=>(index?"ORANGE · ":"CYAN · ")+memberName(id)).join("   "):"Two corners open";
-    $("fighterHealthLeft").style.width=(left?left.hp:0)+"%";$("fighterHealthRight").style.width=(right?right.hp:0)+"%";
+    // "ORANGE" and "CYAN" named colours the palette no longer contains. Corner
+    // is what the player can actually see, and it survives a theme change.
+    $("fighterPlayers").textContent=game.players.length?game.players.map((id,index)=>(index?"RIGHT · ":"LEFT · ")+memberName(id)).join("   "):"Two corners open";
+    // Guard has a recovery now, so the button has to show it or the only way to
+    // learn the rule is to press it and have nothing happen.
+    const mine=seat>=0?game.fighters[state.localId]:null,fightNow=Date.now();
+    $("fightBlock").classList.toggle("cooling",Boolean(mine&&fightNow<mine.guardReadyAt&&mine.guardUntil<=fightNow));
+    for(const [id,fighter] of [["fighterHealthLeft",left],["fighterHealthRight",right]]){
+      const bar=$(id),hp=fighter?fighter.hp:0;
+      bar.style.width=hp+"%";
+      bar.classList.toggle("hurt",hp>0&&hp<=55);
+      bar.classList.toggle("critical",hp>0&&hp<=25);
+    }
     }
     if(statusOnly)return;
     const ctx=fitCanvas(canvas);if(!ctx)return;
-    ctx.clearRect(0,0,720,320);const bg=ctx.createLinearGradient(0,0,0,320);bg.addColorStop(0,"#100b20");bg.addColorStop(.58,"#071324");bg.addColorStop(1,"#09101a");ctx.fillStyle=bg;ctx.fillRect(0,0,720,320);drawPortalRing(ctx,45,160,80,"#42d9ff");drawPortalRing(ctx,675,160,80,"#ff8a2a");
-    ctx.fillStyle="rgba(18,37,58,.9)";ctx.fillRect(0,258,720,62);ctx.strokeStyle="rgba(91,159,202,.22)";for(let x=-40;x<760;x+=50){ctx.beginPath();ctx.moveTo(360,258);ctx.lineTo(x,320);ctx.stroke()}for(let y=270;y<320;y+=13){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(720,y);ctx.stroke()}
+    const paints=paint();
+    ctx.clearRect(0,0,720,320);ctx.fillStyle=paints.ink;ctx.fillRect(0,0,720,320);
+    drawPortalRing(ctx,45,160,80,paints.live);drawPortalRing(ctx,675,160,80,paints.wait);
+    ctx.fillStyle=paints.raise;ctx.fillRect(0,258,720,62);ctx.strokeStyle=paints.rule;ctx.lineWidth=1;
+    for(let x=-40;x<760;x+=50){ctx.beginPath();ctx.moveTo(360,258);ctx.lineTo(x,320);ctx.stroke()}
+    for(let y=270;y<320;y+=13){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(720,y);ctx.stroke()}
     // The authoritative x jumps 0.055 per keypress, which reads as teleporting.
     // Ease a display-only position toward it so the fighter walks. This never
     // touches game state, so hit detection stays exactly as the coordinator
     // computed it and the smoothing cannot desync anything.
-    if(left)drawArenaClawd(ctx,smoothX(game.players[0],left.x)*720,238,left,"#42d9ff",0);
-    if(right)drawArenaClawd(ctx,smoothX(game.players[1],right.x)*720,238,right,"#ff8a2a",1);
-    if(!game.players.length){ctx.fillStyle="#e9f3ff";ctx.font="700 19px system-ui";ctx.textAlign="center";ctx.fillText("Choose a corner",360,151)}
-    if(game.status==="ended"){ctx.fillStyle="rgba(2,5,12,.72)";ctx.fillRect(225,120,270,65);ctx.fillStyle="#fff";ctx.font="800 22px system-ui";ctx.textAlign="center";ctx.fillText(memberName(game.winner)+" WINS",360,160)}
+    if(left)drawArenaClawd(ctx,smoothX(game.players[0],left.x)*720,238,left,paints.live,0);
+    if(right)drawArenaClawd(ctx,smoothX(game.players[1],right.x)*720,238,right,paints.wait,1);
+    if(!game.players.length){ctx.fillStyle=paints.text;ctx.font="700 19px system-ui";ctx.textAlign="center";ctx.fillText("Choose a corner",360,151)}
+    if(game.status==="ended"){ctx.fillStyle=paints.raise;ctx.fillRect(225,120,270,65);ctx.strokeStyle=paints.rule;ctx.lineWidth=1;ctx.strokeRect(225.5,120.5,269,64);ctx.fillStyle=paints.text;ctx.font="800 22px system-ui";ctx.textAlign="center";ctx.fillText(memberName(game.winner)+" WINS",360,160)}
   }
 
   function drawArenaClawd(ctx,x,y,fighter,colour,index){
-    const blocking=fighter.blockUntil>Date.now(),attacking=Date.now()-fighter.lastAttackAt<260;ctx.save();ctx.translate(x,y);ctx.scale(fighter.facing,1);ctx.shadowColor=colour;ctx.shadowBlur=18;ctx.fillStyle=colour;ctx.beginPath();ctx.ellipse(0,-27,31,25,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle="#eafcff";ctx.lineWidth=5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-19,-35);ctx.lineTo(-36,-58);ctx.moveTo(18,-35);ctx.lineTo(attacking?58:38,attacking?-34:-56);ctx.moveTo(-16,-9);ctx.lineTo(-26,4);ctx.moveTo(16,-9);ctx.lineTo(27,4);ctx.stroke();if(blocking){ctx.strokeStyle="#aef4ff";ctx.lineWidth=5;ctx.beginPath();ctx.arc(30,-31,28,-1.4,1.4);ctx.stroke()}ctx.fillStyle="#06111c";ctx.beginPath();ctx.arc(9,-34,4,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle="#e8f4ff";ctx.font="650 11px system-ui";ctx.textAlign="center";ctx.fillText(memberName(state.games.fighter.players[index]).slice(0,15),x,y+30);
+    const paints=paint(),now=Date.now();
+    const guarding=fighter.guardUntil>now,attacking=now-fighter.lastAttackAt<260;
+    ctx.save();ctx.translate(x,y);ctx.scale(fighter.facing,1);
+    ctx.fillStyle=colour;ctx.beginPath();ctx.ellipse(0,-27,31,25,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=paints.text;ctx.lineWidth=5;ctx.lineCap="round";ctx.beginPath();
+    ctx.moveTo(-19,-35);ctx.lineTo(-36,-58);
+    ctx.moveTo(18,-35);ctx.lineTo(attacking?58:38,attacking?-34:-56);
+    ctx.moveTo(-16,-9);ctx.lineTo(-26,4);ctx.moveTo(16,-9);ctx.lineTo(27,4);ctx.stroke();
+    if(guarding){ctx.strokeStyle=paints.text;ctx.lineWidth=5;ctx.globalAlpha=.65;
+      ctx.beginPath();ctx.arc(30,-31,28,-1.4,1.4);ctx.stroke();ctx.globalAlpha=1}
+    ctx.fillStyle=paints.ink;ctx.beginPath();ctx.arc(9,-34,4,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle=paints.dim;ctx.font="650 11px system-ui";ctx.textAlign="center";
+    ctx.fillText(memberName(state.games.fighter.players[index]).slice(0,15),x,y+30);
   }
+
 
   async function updateRouteStats(preferred){
     const conn=preferred&&preferred.pc?preferred:openLinks()[0];
@@ -3943,6 +4349,7 @@
   }
 
   function closeConnection(){
+    closeRendezvous("");
     clearInterval(state.statsTimer);clearInterval(state.presenceTimer);clearInterval(state.raceTimer);clearTimeout(state.typingTimer);
     state.connected=false;state.mode="";state.relayJoined=false;
     if(state.relay){state.relay.close();state.relay=null}
@@ -4158,6 +4565,370 @@
   function normaliseHost(value){return String(value||"").trim().toLowerCase().replace(/^(?:https?|turns?):\/\//,"").replace(/^(?:turns?):/,"").split(/[/?#]/)[0].replace(/:\d+$/,"").replace(/\.$/,"")}
   function validHost(value){return /^(?:[a-z0-9-]+\.)*[a-z0-9-]+$/i.test(value)&&value.length<=253}
   function clipUtf8(value,max){let out="",used=0;for(const char of String(value)){const size=encoder.encode(char).length;if(used+size>max)break;out+=char;used+=size}return out}
+  // ---- Rendezvous --------------------------------------------------------
+  //
+  // Both devices lost the link, so neither can signal to the other: the mesh
+  // carries offers over an open data channel, and there is no open data
+  // channel. The relay is the only way back in. Each side opens a mailbox in a
+  // room derived from the room id, posts its token, and reads the other's.
+  //
+  // Roles come from the same rule the mesh uses, the lower device id offers,
+  // so both sides agree without negotiating and glare never arises.
+
+  const RENDEZVOUS_REPOST_MS = 4000;     // also the mailbox heartbeat: five idle polls and it gives up
+  const RENDEZVOUS_LIFE_MS = 180000;     // one attempt, then close and let the backoff decide
+
+  // Measured on the live relay: a 123-character token took 24 seconds to travel
+  // one way, so a round trip is roughly 50. Chrome abandons ICE about fifteen
+  // seconds after checking starts. Whoever adds the peer's candidate first has
+  // therefore already given up by the time the other side is ready, which is
+  // exactly what the first end-to-end run did: the answerer started checking at
+  // 12:14:17 and the offerer only applied its answer at 12:14:41.
+  //
+  // No amount of tuning closes a 50-second round trip into a 15-second window.
+  // So neither side starts on receipt. The offerer names an absolute moment,
+  // the answerer echoes it back, and both add the peer's candidate then. The
+  // two clocks only have to agree to within a few seconds, which NTP gives us,
+  // and the cost is that a reconnect takes about a minute rather than being
+  // instant. It is still a reconnect nobody had to do anything for.
+  const RENDEZVOUS_START_DELAY_MS = 75000;
+  const RENDEZVOUS_MAX_SKEW_MS = 150000;
+  let rendezvous = null;
+
+  class Rendezvous{
+    constructor(roomId,peerId){
+      this.roomId=roomId;this.peerId=peerId;this.closed=false;
+      this.conn=null;this.wire="";this.applied="";this.mailbox=null;
+      // Set by the offerer, echoed by the answerer, honoured by both.
+      this.startAt=0;this.startTimer=0;
+    }
+
+    async open(){
+      const room=await rendezvousRoom(this.roomId);
+      this.mailbox=new IceMailbox({
+        host:SIGNAL_HOST,room,name:"rv",clientId:state.relayClientId,
+        ports:RELAY_PORTS,getPC:getPeerConstructor
+      },event=>this.onEvent(event));
+      await this.mailbox.connect();
+      // A link can come up while the mailbox is still connecting, and close()
+      // ran before there was a mailbox to close. Without this it keeps polling
+      // for the life of the tab.
+      if(this.closed){ try{ this.mailbox.close() }catch{} return }
+      logEvent("Rendezvous open, looking for "+memberName(this.peerId));
+      this.life=setTimeout(()=>this.close("Rendezvous timed out"),RENDEZVOUS_LIFE_MS);
+      this.beat=setInterval(()=>this.post(),RENDEZVOUS_REPOST_MS);
+      if(this.offering())await this.makeOffer();
+    }
+
+    // The relay is a log, not a mailbox with history: a client starts reading at
+    // the latest sequence, so anything posted before it arrived is invisible.
+    // Re-posting is what makes the two sides find each other regardless of who
+    // showed up first, and it doubles as the keepalive the mailbox needs.
+    post(){
+      if(this.closed||!this.wire)return;
+      this.mailbox.send(this.wire).catch(()=>{});
+    }
+
+    offering(){ return state.localId < this.peerId }
+
+    async makeOffer(){
+      try{
+        this.conn=makePeerConnection({role:"rendezvous-offerer",expectedPeerId:this.peerId,
+          expectedPeerName:memberName(this.peerId)});
+        bindDataChannel(this.conn,this.conn.pc.createDataChannel(APP,{ordered:true}));
+        await this.conn.pc.setLocalDescription(await this.conn.pc.createOffer());
+        await waitForIce(this.conn.pc);
+        await this.publish("o",this.conn.pc.localDescription.sdp);
+      }catch(error){ this.close("Rendezvous offer failed: "+messageOf(error)) }
+    }
+
+    async publish(role,sdp){
+      const fields=tokenFieldsFromSdp(sdp);
+      if(!fields)throw new Error("no routable candidate to advertise");
+      if(!this.startAt)this.startAt=Date.now()+RENDEZVOUS_START_DELAY_MS;
+      fields.startAt=this.startAt;
+      const body=packToken(fields);
+      if(!body)throw new Error("token could not be packed");
+      this.wire=role+"."+state.localId+"."+await signToken(body,this.roomId);
+      logEvent("Rendezvous published an "+(role==="o"?"offer":"answer")+" token ("
+        +this.wire.length+" chars, "+fields.kind+")");
+      this.post();
+    }
+
+    onEvent(event){
+      if(this.closed)return;
+      if(event.type==="error"){logEvent("Rendezvous relay error: "+messageOf(event.error),"warn");return}
+      if(event.type!=="message")return;
+      const text=event.message?event.message.text:"";
+      const match=String(text||"").match(/^([oa])\.([a-f0-9]{16})\.([A-Za-z0-9_-]+)$/);
+      if(!match)return;
+      const [,role,senderId,payload]=match;
+      if(senderId===state.localId||senderId!==this.peerId)return;
+      if(payload===this.applied)return;
+      this.applied=payload;
+      this.consume(role,payload).catch(error=>logEvent("Rendezvous: "+messageOf(error),"warn"));
+    }
+
+    async consume(role,payload){
+      const token=await verifyToken(payload,this.roomId);
+      // A bad signature means someone in the rendezvous room does not hold the
+      // room id. Drop it silently rather than attempting a connection to them.
+      if(!token)return;
+      if(role==="o"&&!this.offering())await this.answer(token);
+      if(role==="a"&&this.offering())await this.accept(token);
+    }
+
+    async answer(token){
+      if(this.conn)return;
+      this.conn=makePeerConnection({role:"rendezvous-answerer",expectedPeerId:this.peerId,
+        expectedPeerName:memberName(this.peerId)});
+      // Candidate withheld: see sdpFromToken. Our clock must not start until we
+      // have finished gathering and posted the answer.
+      await this.conn.pc.setRemoteDescription({type:"offer",sdp:sdpFromToken(token,false)});
+      await this.conn.pc.setLocalDescription(await this.conn.pc.createAnswer());
+      await waitForIce(this.conn.pc);
+      // Adopt the offerer's moment BEFORE publishing, or publish() mints a
+      // fresh one and the answer echoes a deadline the offerer never chose.
+      // That is a real bug this caught: the two sides scheduled twenty seconds
+      // apart and the first to start had timed out before the second began.
+      this.startAt=token.startAt;
+      await this.publish("a",this.conn.pc.localDescription.sdp);
+      this.scheduleStart(token);
+    }
+
+    async accept(token){
+      if(!this.conn||this.conn.closed)return;
+      if(this.conn.pc.remoteDescription)return;
+      // Without the candidate, same as the answering side: applying it here
+      // would start our checks while the peer is still waiting for the agreed
+      // moment, and we would time out before they began.
+      await this.conn.pc.setRemoteDescription({type:"answer",sdp:sdpFromToken(token,false)});
+      this.scheduleStart(token);
+    }
+
+    // The one moment both sides agree on. A token whose start time is wildly
+    // out is from a device whose clock cannot be trusted to keep this
+    // appointment, so fall back to starting soon and accept the risk.
+    scheduleStart(token){
+      const now=Date.now();
+      let wait=token.startAt-now;
+      if(!(wait>-RENDEZVOUS_MAX_SKEW_MS&&wait<RENDEZVOUS_MAX_SKEW_MS)){
+        logEvent("Rendezvous start time is "+formatDuration(Math.abs(wait))+" out; clocks disagree","warn");
+        wait=2000;
+      }
+      wait=Math.max(0,wait);
+      this.startAt=token.startAt;
+      clearTimeout(this.startTimer);
+      logEvent("Rendezvous agreed on a start in "+formatDuration(wait)+" for "+memberName(this.peerId));
+      this.startTimer=setTimeout(()=>this.start(token),wait);
+    }
+
+    async start(token){
+      if(this.closed||!this.conn||this.conn.closed)return;
+      try{
+        await this.conn.pc.addIceCandidate({candidate:candidateLine(token),sdpMid:"0",sdpMLineIndex:0});
+        logEvent("Rendezvous started checking against "+memberName(this.peerId));
+      }catch(error){ logEvent("Rendezvous candidate rejected: "+messageOf(error),"warn") }
+    }
+
+    close(reason){
+      if(this.closed)return;
+      this.closed=true;clearInterval(this.beat);clearTimeout(this.life);clearTimeout(this.startTimer);
+      try{ this.mailbox&&this.mailbox.close() }catch{}
+      // On success onChannelOpen closes us and the connection is the whole
+      // point, so leave it. On expiry it is a half-built connection nobody
+      // will finish.
+      if(this.conn&&!this.conn.closed&&!(this.conn.channel&&this.conn.channel.readyState==="open"))
+        closePeerConnection(this.conn,"");
+      if(reason)logEvent(reason,"warn");
+      if(rendezvous===this)rendezvous=null;
+    }
+  }
+
+  // Opened only while a repair is actually needed, and then not on every
+  // presence tick. A mailbox cycle is six short-lived peer connections; against
+  // a relay that is down, retrying every eight seconds forever is a flat
+  // battery and nothing else. Same backoff shape as the mesh.
+  let rendezvousRetryAt = 0, rendezvousTries = 0;
+  function ensureRendezvous(){
+    if(rendezvous||state.mode!=="direct"||!state.room)return;
+    if(openLinks().length||Date.now()<rendezvousRetryAt)return;
+    const peer=knownMembers().sort((a,b)=>a.id.localeCompare(b.id))[0];
+    if(!peer)return;
+    rendezvousTries++;
+    rendezvousRetryAt=Date.now()+Math.min(MESH_RETRY_MAX_MS,MESH_RETRY_BASE_MS*2**(rendezvousTries-1));
+    rendezvous=new Rendezvous(state.room.id,peer.id);
+    rendezvous.open().catch(error=>{
+      logEvent("Rendezvous could not open: "+messageOf(error)
+        +" · next attempt in "+formatDuration(rendezvousRetryAt-Date.now()),"warn");
+      if(rendezvous)rendezvous.close("");
+    });
+  }
+
+  function resetRendezvousBackoff(){ rendezvousRetryAt=0; rendezvousTries=0 }
+
+  function closeRendezvous(reason){ if(rendezvous)rendezvous.close(reason) }
+
+  // ---- Rendezvous tokens -------------------------------------------------
+  //
+  // Reconnecting two devices needs an SDP each way, and the only channel a
+  // published artifact has left is the STUN mailbox at roughly twelve bytes a
+  // second. A measured offer off this build is 716 characters, which is a
+  // minute of relay time in each direction against an ICE window of fifteen
+  // seconds. So the SDP does not travel.
+  //
+  // What travels is the part that cannot be derived: the ICE credentials, the
+  // DTLS fingerprint, the setup role and one candidate. Every other line of
+  // every SDP this app produces is fixed by its own construction, so each side
+  // rebuilds the peer's description locally from a template. Verified: two
+  // connections that exchanged only these fields reached "connected".
+  //
+  // Packed and base64url'd this is about 100 characters, one relay message,
+  // and roughly four seconds of reading. Base64 also sidesteps a sharp edge in
+  // the relay: makeDataFrame rewrites a chunk whose last two bytes are both
+  // zero, which would silently corrupt a raw fingerprint into a DTLS failure
+  // with nothing in any log to explain it. ASCII payloads never hit that path.
+
+  const TOKEN_VERSION = 1;
+
+  function tokenFieldsFromSdp(sdp){
+    const grab = re => (String(sdp).match(re) || [])[1] || "";
+    const ufrag = grab(/^a=ice-ufrag:(\S+)/m);
+    const pwd = grab(/^a=ice-pwd:(\S+)/m);
+    const fingerprint = grab(/^a=fingerprint:sha-256 (\S+)/mi);
+    const setup = grab(/^a=setup:(\S+)/m);
+    if(!ufrag || !pwd || !fingerprint || !setup) return null;
+    // Relay first: a reconnect that matters is one across two carrier NATs, and
+    // only a relay candidate survives that. srflx is the fallback for the case
+    // where at least one side has a friendly network.
+    const candidates = String(sdp).match(/^a=candidate:.*$/gm) || [];
+    const pick = candidates.find(line => / typ relay /.test(line))
+      || candidates.find(line => / typ srflx /.test(line));
+    if(!pick) return null;
+    const parsed = pick.match(/^a=candidate:\S+ \d+ (udp|tcp) \d+ (\d+\.\d+\.\d+\.\d+) (\d+) typ (\w+)/i);
+    if(!parsed) return null;
+    return{ufrag,pwd,fingerprint,setup,ip:parsed[2],port:Number(parsed[3]),kind:parsed[4].toLowerCase()};
+  }
+
+  const SETUP_ROLES = ["actpass","active","passive"];
+
+  function packToken(fields){
+    const ufrag = encoder.encode(fields.ufrag), pwd = encoder.encode(fields.pwd);
+    const hex = fields.fingerprint.split(":");
+    const octets = fields.ip.split(".").map(Number);
+    if(ufrag.length > 64 || pwd.length > 64 || hex.length !== 32 || octets.length !== 4) return null;
+    const role = Math.max(0, SETUP_ROLES.indexOf(fields.setup));
+    const body = new Uint8Array(4 + ufrag.length + pwd.length + 32 + 6 + 4);
+    let at = 0;
+    body[at++] = TOKEN_VERSION;
+    body[at++] = role | (fields.kind === "relay" ? 0x80 : 0);
+    body[at++] = ufrag.length; body.set(ufrag, at); at += ufrag.length;
+    body[at++] = pwd.length;   body.set(pwd, at);   at += pwd.length;
+    for(const pair of hex) body[at++] = parseInt(pair, 16) & 0xff;
+    for(const octet of octets) body[at++] = octet & 0xff;
+    body[at++] = (fields.port >> 8) & 0xff; body[at++] = fields.port & 0xff;
+    const startAt = Math.floor(fields.startAt / 1000);
+    body[at++] = (startAt >>> 24) & 0xff; body[at++] = (startAt >>> 16) & 0xff;
+    body[at++] = (startAt >>> 8) & 0xff;  body[at++] = startAt & 0xff;
+    return body;
+  }
+
+  function unpackToken(body){
+    try{
+      if(!body || body.length < 48 || body[0] !== TOKEN_VERSION) return null;
+      let at = 1;
+      const flags = body[at++];
+      const ufragLength = body[at++]; const ufrag = decoder.decode(body.subarray(at, at + ufragLength)); at += ufragLength;
+      const pwdLength = body[at++];   const pwd = decoder.decode(body.subarray(at, at + pwdLength));     at += pwdLength;
+      if(at + 42 !== body.length) return null;
+      const hex = [];
+      for(let i = 0; i < 32; i++) hex.push(body[at++].toString(16).padStart(2,"0").toUpperCase());
+      const ip = [body[at++],body[at++],body[at++],body[at++]].join(".");
+      const port = (body[at++] << 8) | body[at++];
+      const startAt = ((body[at++] << 24) | (body[at++] << 16) | (body[at++] << 8) | body[at++]) >>> 0;
+      if(!/^[\x21-\x7e]{1,64}$/.test(ufrag) || !/^[\x21-\x7e]{1,64}$/.test(pwd) || !port) return null;
+      return{ufrag,pwd,fingerprint:hex.join(":"),setup:SETUP_ROLES[flags & 0x0f] || "actpass",
+        ip,port,kind:flags & 0x80 ? "relay" : "srflx",startAt:startAt * 1000};
+    }catch{ return null }
+  }
+
+  // Every line here except the five carried in the token is the same in every
+  // description this app has ever produced, because it builds every connection
+  // the same way: one ordered data channel, max-bundle, nothing else.
+  function candidateLine(token){
+    return "candidate:1 1 udp "+(token.kind === "relay" ? 41885439 : 1677729535)+" "
+      +token.ip+" "+token.port+" typ "+token.kind+" raddr 0.0.0.0 rport 0 generation 0";
+  }
+
+  // withCandidate:false is not an optimisation, it is the whole reason this
+  // works inside the ICE window. A remote description carrying a candidate
+  // starts the receiver's connectivity checks, and Chrome abandons them about
+  // fifteen seconds later. The answering side needs roughly ten of those
+  // seconds just to gather its own relay candidate, and the offerer then needs
+  // four more to read the reply off a twelve-byte-a-second channel. Applying
+  // the offer without its candidate leaves ICE idle until the answer is
+  // already posted, which is the same trick that fixed manual pairing.
+  function sdpFromToken(token,withCandidate=true){
+    return [
+      "v=0","o=- 1 2 IN IP4 127.0.0.1","s=-","t=0 0",
+      "a=group:BUNDLE 0","a=extmap-allow-mixed","a=msid-semantic: WMS",
+      "m=application "+(withCandidate?token.port:9)+" UDP/DTLS/SCTP webrtc-datachannel",
+      "c=IN IP4 "+(withCandidate?token.ip:"0.0.0.0"),
+      ...(withCandidate?["a="+candidateLine(token)]:[]),
+      "a=ice-ufrag:"+token.ufrag,"a=ice-pwd:"+token.pwd,"a=ice-options:trickle",
+      "a=fingerprint:sha-256 "+token.fingerprint,
+      "a=setup:"+token.setup,"a=mid:0","a=sctp-port:5000","a=max-message-size:262144",
+    ].join("\r\n")+"\r\n";
+  }
+
+  // The rendezvous room name is the only credential the relay checks, so it is
+  // derived from the room id by hash rather than being the room id: someone
+  // watching the relay cannot tell which room is which. The token is then
+  // signed with the room id itself, so forging one needs what an invite needs.
+  // That is the same trust boundary the app already has, not a weaker one.
+  async function roomSecret(roomId){
+    return crypto.subtle.importKey("raw", encoder.encode("clawdvert-rendezvous:"+roomId),
+      {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
+  }
+
+  async function rendezvousRoom(roomId){
+    const digest = await crypto.subtle.digest("SHA-256", encoder.encode("clawdvert-room:"+roomId));
+    return "cv" + [...new Uint8Array(digest).slice(0,8)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function signToken(body, roomId){
+    const mac = new Uint8Array(await crypto.subtle.sign("HMAC", await roomSecret(roomId), body));
+    const signed = new Uint8Array(body.length + 8);
+    signed.set(body, 0); signed.set(mac.subarray(0,8), body.length);
+    return bytesToBase64Url(signed);
+  }
+
+  async function verifyToken(text, roomId){
+    const signed = base64UrlToBytes(text);
+    if(!signed || signed.length < 12) return null;
+    const body = signed.subarray(0, signed.length - 8), mac = signed.subarray(signed.length - 8);
+    const expected = new Uint8Array(await crypto.subtle.sign("HMAC", await roomSecret(roomId), body));
+    let mismatch = 0;
+    for(let i = 0; i < 8; i++) mismatch |= expected[i] ^ mac[i];
+    if(mismatch) return null;
+    return unpackToken(body);
+  }
+
+  function bytesToBase64Url(bytes){
+    let binary=""; for(const byte of bytes) binary+=String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+  }
+
+  function base64UrlToBytes(text){
+    try{
+      const padded=String(text).replace(/-/g,"+").replace(/_/g,"/");
+      const binary=atob(padded+"=".repeat((4-padded.length%4)%4));
+      const bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      return bytes;
+    }catch{ return null }
+  }
+
   function base64Url(value){let binary="";for(const byte of encoder.encode(value))binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
   function randomHex(bytes){const value=new Uint8Array(bytes);crypto.getRandomValues(value);return Array.from(value,b=>b.toString(16).padStart(2,"0")).join("")}
   function initials(name){return cleanName(name).split(/\s+/).slice(0,2).map(part=>part[0]).join("").toUpperCase().slice(0,2) || "P"}

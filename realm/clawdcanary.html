@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>clawdcanary</title>
+<style>
+  /* Achromatic throughout, with exactly one coloured thing on the page: what
+     leaked. Everything else is rule work and spacing. A tinted panel or a second
+     accent would only compete with the one fact worth looking at. */
+  :root{
+    --bg:#fff; --ink:#0e1116; --dim:#71767f; --rule:#e4e6ea; --leak:#c8102e;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0a0c0f; --ink:#e8eaee; --dim:#7e848e; --rule:#1b1f26; --leak:#ff4d5e}
+  }
+  :root[data-theme="dark"]{--bg:#0a0c0f;--ink:#e8eaee;--dim:#7e848e;--rule:#1b1f26;--leak:#ff4d5e}
+  :root[data-theme="light"]{--bg:#fff;--ink:#0e1116;--dim:#71767f;--rule:#e4e6ea;--leak:#c8102e}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);
+    font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums}
+  main{width:min(620px,100% - 36px);margin-inline:auto;padding:44px 0 40px}
+  @media(max-width:600px){main{padding:26px 0 32px}}
+
+  .tag{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);
+    display:flex;align-items:center;gap:10px;margin:0 0 30px}
+  .tag:after{content:"";flex:1;height:1px;background:var(--rule)}
+
+  .claim{font-size:13px;line-height:1.55;margin:0 0 26px;max-width:46ch;color:var(--dim)}
+  .claim b{color:var(--ink);font-weight:600}
+
+  /* The one bold move. */
+  #address{font-size:clamp(26px,7.4vw,46px);line-height:1.05;letter-spacing:-.045em;
+    font-weight:700;color:var(--leak);word-break:break-all;margin:0}
+  #address.pending{color:var(--dim);font-size:clamp(18px,4vw,26px);letter-spacing:-.02em}
+  #seen{color:var(--dim);font-size:11.5px;margin:9px 0 0}
+
+  .pair{display:grid;grid-template-columns:64px 1fr;gap:5px 14px;margin:26px 0 0;
+    padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .pair dt{color:var(--dim);font-size:11.5px}
+  .pair dd{margin:0;font-size:11.5px}
+  .no{color:var(--leak)}
+
+  h2{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);
+    font-weight:400;margin:30px 0 0}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0 0}
+  th{text-align:left;font-weight:400;color:var(--dim);padding:6px 14px 6px 0;
+    width:42%;vertical-align:top;font-size:11.5px}
+  td{padding:6px 0;vertical-align:top;font-size:11.5px;word-break:break-word}
+  td.leak{color:var(--leak)}
+  td.off{color:var(--dim)}
+
+  .note{color:var(--dim);font-size:11px;line-height:1.6;margin:18px 0 0;max-width:56ch}
+
+  footer{margin:30px 0 0;padding-top:14px;border-top:1px solid var(--rule);
+    color:var(--dim);font-size:11px;display:flex;justify-content:space-between;
+    gap:12px;flex-wrap:wrap}
+
+  button{background:none;border:0;color:var(--dim);font:inherit;font-size:11px;
+    padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  button:hover{color:var(--ink)}
+  button:disabled{opacity:.4;cursor:default;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+  <p class="tag">clawdcanary</p>
+
+  <p class="claim">This page is served under a policy that forbids it from making
+    any network request. <b>It found your address anyway.</b></p>
+
+  <p id="address" class="pending">measuring</p>
+  <p id="seen">&nbsp;</p>
+
+  <dl class="pair">
+    <dt>fetch()</dt><dd id="fetchState">testing</dd>
+    <dt>stun</dt><dd id="stunState">testing</dd>
+  </dl>
+
+  <h2>What a canary would have kept</h2>
+  <table>
+    <tr><th>public IPv4</th><td id="rPublic" class="off">—</td></tr>
+    <tr><th>source port</th><td id="rPort" class="off">—</td></tr>
+    <tr><th>IPv6</th><td id="rV6" class="off">—</td></tr>
+    <tr><th>local addresses</th><td id="rLocal" class="off">—</td></tr>
+    <tr><th>interfaces</th><td id="rIfaces" class="off">—</td></tr>
+    <tr><th>NAT mapping</th><td id="rMapping" class="off">—</td></tr>
+    <tr><th>round trip</th><td id="rRtt" class="off">—</td></tr>
+    <tr><th>location</th><td id="rLocation" class="off">—</td></tr>
+    <tr><th>egress</th><td id="rEgress" class="off">—</td></tr>
+    <tr><th>engine</th><td id="rEngine" class="off">—</td></tr>
+    <tr><th>sandbox realm</th><td id="rRealm" class="off">—</td></tr>
+  </table>
+
+  <p class="note">One observer gives a radius, not a point. Relays in three
+    separated regions would turn these same response times into a position,
+    without ever asking the browser where it is.</p>
+
+  <footer>
+    <span>Nothing was recorded. No log, no server, nothing kept.</span>
+    <button id="rerun" type="button">measure again</button>
+  </footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // Empty means inert: the page measures against public STUN, names no
+  // infrastructure of its own, and nothing anywhere records the visit.
+  //
+  // Set this to your own relay and the page becomes a real canary. Nothing in
+  // the page changes except that one more server is asked, and that server is
+  // yours, so it sees the source address and can write it down. The recording
+  // happens at the relay, never here, which is why arming it is a change to the
+  // server rather than to this file.
+  //
+  //   const RELAY = { label: "relay.example.com", url: "stun:relay.example.com:3478" };
+  const RELAY = null;
+
+  const OBSERVERS = [
+    { label: "stun.cloudflare.com", url: "stun:stun.cloudflare.com:3478" },
+    { label: "stun.l.google.com", url: "stun:stun.l.google.com:19302" },
+  ].concat(RELAY ? [RELAY] : []);
+
+  const $ = id => document.getElementById(id);
+  const set = (id, text, cls) => { const n = $(id); n.textContent = text; if (cls !== undefined) n.className = cls; };
+  let lastHosts = [], lastSdp = "", borrowedRealm = "none needed", violation = null;
+
+  // The runtime removes RTCPeerConnection from this window. That removal applies
+  // to one JavaScript realm; a fresh about:blank child has its own intrinsics.
+  function peerConstructor() {
+    if (typeof window.RTCPeerConnection === "function") return window.RTCPeerConnection;
+    try {
+      const frame = document.createElement("iframe");
+      frame.setAttribute("aria-hidden", "true");
+      frame.style.cssText = "position:absolute;width:0;height:0;border:0;opacity:0";
+      document.body.appendChild(frame);
+      const fresh = frame.contentWindow && frame.contentWindow.RTCPeerConnection;
+      if (typeof fresh === "function") { borrowedRealm = "child about:blank frame"; return fresh; }
+    } catch (error) { /* handled by the null return */ }
+    return null;
+  }
+
+  document.addEventListener("securitypolicyviolation", event => {
+    if (!violation) violation = String(event.originalPolicy || "").match(/connect-src [^;]*/)?.[0]
+      || event.effectiveDirective || event.violatedDirective;
+  });
+
+  function gather(servers, timeoutMs = 5000) {
+    return new Promise(resolve => {
+      const PC = peerConstructor();
+      if (!PC) return resolve({ found: [], fatal: "WebRTC unavailable in every realm" });
+      let pc;
+      const found = [], started = performance.now();
+      const finish = () => {
+        clearTimeout(timer);
+        try {
+          if (pc.localDescription && pc.localDescription.sdp) lastSdp = pc.localDescription.sdp;
+          pc.onicecandidate = null; pc.close();
+        } catch (e) {}
+        const hosts = found.filter(c => c.type === "host");
+        if (hosts.length) lastHosts = hosts;
+        resolve({ found });
+      };
+      try { pc = new PC({ iceServers: servers.map(url => ({ urls: url })) }); }
+      catch (error) { return resolve({ found: [], fatal: String(error && error.message || error) }); }
+      const timer = setTimeout(finish, timeoutMs);
+      pc.onicecandidate = event => {
+        if (!event.candidate) return finish();
+        const c = event.candidate;
+        found.push({ type: c.type, address: c.address || "", port: Number(c.port) || 0,
+                     ms: Math.round(performance.now() - started) });
+      };
+      try {
+        pc.createDataChannel("c");
+        pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(finish);
+      } catch (error) { finish(); }
+    });
+  }
+
+  const srflxOf = result => (result.found || []).filter(c => c.type === "srflx");
+
+  async function testFetch() {
+    try {
+      await fetch("https://example.com/probe", { mode: "no-cors", cache: "no-store" });
+      set("fetchState", "allowed — this page is not sandboxed");
+    } catch (error) {
+      await new Promise(r => setTimeout(r, 60));
+      set("fetchState", "blocked — " + (violation || "refused before leaving the browser"), "no");
+    }
+  }
+
+
+
+  // Light does about 200 km per millisecond in fibre, so a round trip of X ms
+  // puts the client no further than roughly 100X km from whatever answered.
+  // Processing delay only inflates RTT, which makes this a ceiling and never an
+  // estimate. Against anycast servers the responder could be anywhere, so this
+  // is a radius around an unknown centre: real, and on its own not much use.
+  function radiusFrom(rttMs) {
+    const km = Math.round(rttMs * 100 / 100) * 100;
+    return "within " + km.toLocaleString() + " km of the responding edge";
+  }
+
+  function engineFromIce() {
+    if (!lastSdp) return "not determined";
+    const ufrag = (lastSdp.match(/a=ice-ufrag:(\S+)/) || [])[1] || "";
+    const mixed = /a=extmap-allow-mixed/.test(lastSdp);
+    const mdns = lastHosts.some(c => /\.local$/i.test(c.address));
+    const guess = mixed && ufrag.length === 4 ? "Chromium"
+      : !mixed && ufrag.length >= 8 ? "Firefox" : "unmatched";
+    return guess + " · ufrag " + ufrag.length + ", " + (mixed ? "extmap-allow-mixed" : "no extmap")
+      + ", " + (mdns ? "mDNS" : "raw hosts");
+  }
+
+  async function measure() {
+    $("rerun").disabled = true;
+    set("address", "measuring", "pending");
+    $("seen").innerHTML = "&nbsp;";
+
+    await testFetch();
+
+    // Each observer separately, so a differing answer between them stays visible
+    // instead of being collapsed into one candidate list.
+    const views = await Promise.all(OBSERVERS.map(async o => {
+      const out = await gather([o.url]);
+      return { label: o.label, hit: srflxOf(out)[0], fatal: out.fatal };
+    }));
+    const live = views.filter(v => v.hit);
+
+    if (!live.length) {
+      const fatal = views.find(v => v.fatal);
+      set("address", fatal ? "not measurable" : "nothing answered", "pending");
+      $("seen").textContent = fatal ? fatal.fatal
+        : "No STUN server replied. UDP is blocked here, which is itself unusual.";
+      set("stunState", "no reply", "no");
+      finish([], []);
+      $("rerun").disabled = false;
+      return;
+    }
+
+    const primary = live[0].hit;
+    set("stunState", "answered in " + primary.ms + " ms");
+    set("address", primary.address + ":" + primary.port, "");
+    $("seen").textContent = "seen by " + live[0].label
+      + (live.length > 1 ? " and " + (live.length - 1) + " other" : "");
+
+    // One connection, every observer: the only comparison that says anything
+    // about the NAT. The per-observer runs above each had their own local
+    // socket, so their differing ports mean nothing at all.
+    const combined = await gather(OBSERVERS.map(o => o.url), 5000);
+
+    finish(live, srflxOf(combined));
+    $("rerun").disabled = false;
+  }
+
+  function finish(live, sameSocket) {
+    const addresses = [...new Set(live.map(v => v.hit.address))];
+    set("rPublic", addresses.join(", ") || "not observed", addresses.length ? "leak" : "off");
+    // One observation only: the other observers used different sockets, so
+    // listing their ports would imply the NAT handed out several when it did not.
+    set("rPort", live.length ? String(live[0].hit.port) : "—", live.length ? "" : "off");
+
+    const v6 = lastHosts.filter(c => c.address.includes(":") && !/^fe80:|^f[cd]/i.test(c.address));
+    set("rV6", v6.length ? v6[0].address : "none reachable", v6.length ? "leak" : "off");
+
+    const mdns = lastHosts.filter(c => /\.local$/i.test(c.address));
+    const real = lastHosts.filter(c => c.address && !/\.local$/i.test(c.address));
+    set("rLocal", real.length ? real.map(c => c.address).slice(0, 2).join(", ")
+      : mdns.length ? "hidden behind mDNS" : "none", real.length ? "leak" : "");
+
+    set("rIfaces", lastHosts.length
+      ? lastHosts.length + (lastHosts.length > 1 ? " — more than one adapter, or a VPN" : "")
+      : "none exposed", lastHosts.length > 1 ? "leak" : "off");
+
+    const ports = [...new Set((sameSocket || []).map(c => c.port))];
+    set("rMapping", !ports.length ? "not measurable" : ports.length === 1
+      ? "one port to every observer"
+      : ports.length + " ports from one socket — endpoint dependent, needs a relay",
+      ports.length > 1 ? "leak" : ports.length ? "" : "off");
+
+    const times = live.map(v => v.hit.ms);
+    set("rRtt", times.length ? Math.min(...times) + "–" + Math.max(...times) + " ms" : "—",
+        times.length ? "" : "off");
+
+    set("rLocation", times.length ? radiusFrom(Math.min(...times))
+      : "not measurable", times.length ? "" : "off");
+
+    set("rEgress", !live.length ? "—" : addresses.length === 1
+      ? "one address from every observer" : addresses.length + " addresses — more than one way out",
+      addresses.length > 1 ? "leak" : live.length ? "" : "off");
+
+    set("rEngine", engineFromIce(), lastSdp ? "" : "off");
+    set("rRealm", borrowedRealm, borrowedRealm === "none needed" ? "off" : "leak");
+  }
+
+  $("rerun").addEventListener("click", measure);
+  measure();
+})();
+</script>
+</body>
+</html>

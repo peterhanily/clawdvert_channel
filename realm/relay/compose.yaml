@@ -9,6 +9,8 @@ services:
       RELAY_LANES: 6
       PERSIST_MESSAGES: ${PERSIST_MESSAGES:-false}
       MESSAGE_STORE: /data/events.jsonl
+      CANARY_LOG: ${CANARY_LOG:-false}
+      CANARY_KEEP: ${CANARY_KEEP:-500}
     ports:
       - "3478-3483:3478-3483/udp"
       - "127.0.0.1:8080:8080/tcp"

@@ -31,6 +31,25 @@ const persistencePath = process.env.PERSIST_MESSAGES === "true"
   ? process.env.MESSAGE_STORE || "/data/events.jsonl"
   : null;
 
+// Off unless asked for. A relay that logs every source address it sees is a
+// different service from the one this repository otherwise describes, so
+// becoming one has to be a deliberate act and not a side effect of deploying.
+const CANARY_LOG = process.env.CANARY_LOG === "true";
+const CANARY_KEEP = numberEnv("CANARY_KEEP", 500, 1, 20000);
+const sightings = [];
+
+function recordSighting(remote, lane, token) {
+  if (!CANARY_LOG) return;
+  sightings.push({
+    at: new Date().toISOString(),
+    ip: normaliseRemoteAddress(remote.address),
+    port: remote.port,
+    lane,
+    token: token || null,
+  });
+  if (sightings.length > CANARY_KEEP) sightings.splice(0, sightings.length - CANARY_KEEP);
+}
+
 const rooms = new RoomStore({ persistencePath });
 const sockets = [];
 const limits = new Map();
@@ -45,6 +64,16 @@ for (let lane = 0; lane < LANES; lane += 1) {
 }
 
 const health = http.createServer((request, response) => {
+  // compose publishes this on 127.0.0.1 only, so it is reachable over SSH and
+  // not from the internet. What it returns is visitor data; keep it that way.
+  if (request.url === "/canary") {
+    response.writeHead(CANARY_LOG ? 200 : 409,
+      { "content-type": "application/json", "cache-control": "no-store" });
+    response.end(JSON.stringify(CANARY_LOG
+      ? { enabled: true, kept: sightings.length, limit: CANARY_KEEP, sightings }
+      : { enabled: false, hint: "set CANARY_LOG=true and restart to record source addresses" }));
+    return;
+  }
   if (request.url !== "/health") {
     response.writeHead(404).end("not found\n");
     return;
@@ -71,6 +100,9 @@ function handlePacket(socket, lane, packet, remote) {
   // server-reflexive address; TURN Allocate responses below remain the
   // authenticated, synthetic-address mailbox used for signalling/fallback.
   if (message.type === MESSAGE.BINDING_REQUEST) {
+    // The whole canary, in one line: the source address is already here, and
+    // answering it is what a STUN server is for.
+    recordSighting(remote, lane, null);
     const response = buildMessage({
       type: MESSAGE.BINDING_SUCCESS,
       transactionId: message.transactionId,
@@ -117,6 +149,9 @@ function handlePacket(socket, lane, packet, remote) {
 
   const key = longTermKey(username, REALM, envelope.room);
   if (!verifyMessageIntegrity(message, key)) return;
+  // An authenticated allocate carries a room name, which is attribution for
+  // free: which canary was opened, not merely that one was.
+  recordSighting(remote, lane, envelope.room);
 
   const requestedTransport = getAttribute(message, ATTRIBUTE.REQUESTED_TRANSPORT);
   if (!requestedTransport || requestedTransport.value[0] !== 17) {

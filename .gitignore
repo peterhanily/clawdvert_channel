@@ -8,6 +8,9 @@ relay.json
 .relay-state.json
 .env
 .env.*
+# ...except the template, which carries no secrets and is the only place the
+# relay's settings are written down. `.env.*` was quietly swallowing it.
+!.env.example
 .credentials.json
 .claude.json
 

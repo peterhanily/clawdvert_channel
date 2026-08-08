@@ -338,8 +338,8 @@
     .race-button:disabled{filter:grayscale(.7);opacity:.5}
     .score-list{display:flex;flex-direction:column;gap:5px;margin-top:10px}
     .score-row{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;background:var(--panel);font-size:10px}
-    .game-stage{position:relative;margin:14px 0 12px;border:1px solid rgba(79,138,186,.4);border-radius:14px;overflow:hidden;background:#050b16;box-shadow:inset 0 0 40px rgba(0,0,0,.45)}
-    .game-stage canvas{display:block;width:100%;height:auto;aspect-ratio:9/4;touch-action:none}
+    .game-stage{position:relative;display:grid;place-items:center;margin:14px 0 12px;border:1px solid rgba(79,138,186,.4);border-radius:14px;overflow:hidden;background:#050b16;box-shadow:inset 0 0 40px rgba(0,0,0,.45)}
+    .game-stage canvas{display:block;width:100%;height:auto;aspect-ratio:720/320;touch-action:none}
     .game-hud{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}
     .game-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
     .game-key{min-width:38px;height:36px;padding:0 10px;border-radius:10px;background:#18263a;border:1px solid #304b6a;color:var(--soft);font:760 10px var(--mono)}
@@ -370,7 +370,6 @@
     .app.arcade-full>.sidebar,.app.arcade-full>.people{display:none}
     .app.arcade-full>#arcade{height:100vh;height:100dvh;min-height:0;max-height:none;border-radius:0;border-left:0;border-right:0}
     .arcade-body{scrollbar-gutter:stable}
-    .game-stage canvas{display:block;width:100%;height:auto;aspect-ratio:720/320}
     .route-note{margin:0 0 12px;padding:10px 12px;border-radius:11px;font-size:11.5px;
       line-height:1.5;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 94%,transparent);
       color:var(--soft)}
@@ -381,9 +380,9 @@
     /* Three labels in a 268px column. Sized to the longest word rather than
        split evenly, because equal thirds clipped "network" and "connect". */
     #mobileTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;
-      grid-template-columns:repeat(3,1fr);background:var(--raise);
+      background:var(--raise);
       border-top:1px solid var(--rule);padding:4px}
-    #mobileTabs button{padding:11px 6px;border:0;border-radius:8px;background:transparent;
+    #mobileTabs button{flex:1 1 0;padding:11px 6px;border:0;border-radius:8px;background:transparent;
       color:var(--dim);font-size:11.5px;font-weight:600;letter-spacing:.02em}
     #mobileTabs button.on{background:var(--raise-2);color:var(--text)}
     .steps{display:flex;gap:5px;list-style:none;margin:0 0 14px;padding:0}
@@ -431,8 +430,8 @@
     .arcade-body.focused{grid-template-columns:minmax(0,1fr);align-content:stretch;overflow:hidden}
     .arcade-body.focused>:not(.game-card.active){display:none}
     .arcade-body.focused .game-card.active{display:flex;flex-direction:column;min-height:0;height:100%}
-    .arcade-body.focused .game-stage{flex:1;min-height:0;margin:14px 0 10px}
-    .arcade-body.focused .game-stage canvas{width:100%;height:100%;aspect-ratio:auto;object-fit:contain}
+    .arcade-body.focused .game-stage{flex:0 1 auto;width:100%;aspect-ratio:720/320;max-height:60vh;min-height:0;margin:14px 0 10px}
+    .arcade-body.focused .game-stage canvas{width:auto;height:auto;max-width:100%;max-height:100%;margin:auto}
     .arcade-back{display:none;height:32px;padding:0 13px;border-radius:9px;border:1px solid var(--line);
       background:var(--panel-2);color:var(--soft);font-size:12px;font-weight:650}
     .arcade-back.on{display:inline-flex;align-items:center;gap:7px}
@@ -477,11 +476,21 @@
       .app[data-stage="room"]>#arcade,
       .app[data-stage="room"]>#peoplePanel,
       .app[data-stage="room"]>.sidebar{display:none}
-      .app[data-stage="room"][data-mobile="chat"]>#chat,
-      .app[data-stage="room"][data-mobile="chat"]>#arcade{display:grid}
+      .app[data-stage="room"][data-mobile="chat"]>#chat{display:grid}
+      /* A game owns the whole viewport on a phone. The controls used to be
+         negotiated against a fixed 60px tab bar and a stage that absorbed every
+         shortfall, so they ended up under the bar and out of reach. Taking the
+         viewport deletes that whole class of bug rather than patching each
+         instance: there is nothing left on screen to be buried by. */
+      .app[data-stage="room"][data-mobile="arcade"]>#arcade{
+        display:grid;position:fixed;inset:0;z-index:70;background:var(--ink);
+        grid-template-rows:auto minmax(0,1fr)}
+      .app[data-stage="room"][data-mobile="arcade"]>#mobileTabs{display:none}
+      .app[data-stage="room"][data-mobile="arcade"] .arcade-body{
+        padding-bottom:calc(12px + env(safe-area-inset-bottom))}
       .app[data-stage="room"][data-mobile="people"]>#peoplePanel{display:block}
       .app[data-stage="room"][data-mobile="room"]>.sidebar{display:flex}
-      .app[data-stage="room"]>#mobileTabs{display:grid}
+      .app[data-stage="room"]>#mobileTabs{display:flex}
       .app[data-stage="room"][data-mobile="chat"]>#chat{height:calc(100dvh - 60px);min-height:0}
       .app[data-stage="setup"]>.sidebar{width:100%}
       .sidebar{overflow:visible}.side-scroll{overflow:visible}.chat{height:78vh;min-height:580px;border-bottom:0}.people{max-height:none}.people-scroll{display:flex}.head-route{max-width:45%}.arcade-body{grid-template-columns:1fr}.view-switch{margin-right:0}.guide-columns{grid-template-columns:1fr}.classic-grid{grid-template-columns:1fr}
@@ -700,6 +709,7 @@
     <button type="button" data-pane="chat" class="on">Chat</button>
     <button type="button" data-pane="people">Members</button>
     <button type="button" data-pane="room">Room</button>
+    <button type="button" data-pane="arcade">Games</button>
   </nav>
 
   <section id="chat" class="chat" aria-label="clawdvert channel chat">
@@ -848,7 +858,7 @@
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const APP = "clawdvert_channel";
-  const VERSION = "0.23.0-no-answer-clock";
+  const VERSION = "0.24.0-arcade-mobile";
   const CODE_PREFIX = "CC2.";
   const STUN_SERVERS = [
     {name:"Cloudflare",url:"stun:stun.cloudflare.com:3478"},
@@ -1292,10 +1302,11 @@
     $("app").dataset.mobile = "chat";
     for(const tab of $("mobileTabs").querySelectorAll("button")){
       tab.addEventListener("click",()=>{
-        $("app").dataset.mobile = tab.dataset.pane;
-        for(const other of $("mobileTabs").querySelectorAll("button"))
-          other.classList.toggle("on", other === tab);
-        window.scrollTo(0,0);
+        setMobilePane(tab.dataset.pane);
+        // The tab bar and showView each owned half of the navigation state and
+        // never spoke, so the arcade could be selected and never laid out.
+        if(tab.dataset.pane === "arcade") showView("arcade");
+        else if(state.view === "arcade") showView("chat");
       });
     }
     $("startBack").addEventListener("click",()=>{
@@ -1409,6 +1420,16 @@
     $("fightBlock").addEventListener("click", () => sendGameAction("fighter-block"));
     $("fightAttack").addEventListener("click", () => sendGameAction("fighter-attack"));
     document.addEventListener("keydown",handleArcadeKey);
+    // Nothing in this file listened for a resize, so a rotated phone kept a
+    // stale bitmap at the old size. Re-fit without disturbing game state.
+    let refitPending = 0;
+    window.addEventListener("resize", () => {
+      if(refitPending) return;
+      refitPending = requestAnimationFrame(() => {
+        refitPending = 0;
+        if(state.view === "arcade") renderGames(true);
+      });
+    });
     window.addEventListener("beforeunload", closeConnection);
     renderIpVisibility();
   }
@@ -1924,13 +1945,21 @@
     if(!ctx) return null;
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     const rect = canvas.getBoundingClientRect();
-    const wantW = Math.max(1, Math.round((rect.width || CANVAS_W) * dpr));
-    const wantH = Math.max(1, Math.round((rect.height || CANVAS_H) * dpr));
+    // One scale factor for both axes. Deriving the backing store from the
+    // element box and then scaling each axis independently stretched the world
+    // to whatever shape the box happened to be: at 390x844 that was a 3.2x
+    // vertical stretch, and the object-fit:contain meant to letterbox it could
+    // never fire, because a bitmap measured from the box already matches it.
+    const boxW = rect.width || CANVAS_W;
+    const boxH = rect.height || CANVAS_H;
+    const scale = Math.min(boxW / CANVAS_W, boxH / CANVAS_H) * dpr;
+    const wantW = Math.max(1, Math.round(CANVAS_W * scale));
+    const wantH = Math.max(1, Math.round(CANVAS_H * scale));
     // Assigning width or height clears the canvas, so only do it on a change.
     if(canvas.width !== wantW || canvas.height !== wantH){
       canvas.width = wantW; canvas.height = wantH;
     }
-    ctx.setTransform(wantW / CANVAS_W, 0, 0, wantH / CANVAS_H, 0, 0);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
     return ctx;
   }
 
@@ -2862,10 +2891,21 @@
     if(!state.channels.has(id))return;state.activeChannel=id;showView("chat");renderMessages();renderRoomIdentity();renderChannels();persistRoomState();
   }
 
+  function setMobilePane(pane){
+    const app = $("app");
+    if(app) app.dataset.mobile = pane;
+    for(const other of $("mobileTabs").querySelectorAll("button"))
+      other.classList.toggle("on", other.dataset.pane === pane);
+    window.scrollTo(0,0);
+  }
+
   function showView(view){
     state.view=view==="arcade"?"arcade":"chat";
     $("chat").hidden=state.view!=="chat";$("arcade").hidden=state.view!=="arcade";
     document.querySelector(".app").classList.toggle("arcade-full",state.view==="arcade");
+    // Keep the mobile pane in step, so entering the arcade from the sidebar
+    // actually shows it rather than leaving a hidden pane selected.
+    setMobilePane(state.view === "arcade" ? "arcade" : "chat");
     $("chatViewButton").classList.toggle("active",state.view==="chat");$("arcadeViewButton").classList.toggle("active",state.view==="arcade");
     if(state.view==="chat")state.unreadCounts.delete(state.activeChannel);
     renderChannels();if(state.view==="chat")renderMessages();else renderGames();renderUnread();

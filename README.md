@@ -1,7 +1,5 @@
 # clawdvert_channel
 
-<img src="docs/img/clawdvert-logo.png" alt="Clawdvert Channel" width="420">
-
 **A write-up of this work is coming soon on the [CaddyLabs blog](https://caddylabs.io/).**
 
 Claude Code publishes HTML pages as hosted artifacts on claude.ai. It does that through an internal

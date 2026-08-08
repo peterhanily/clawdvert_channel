@@ -1,0 +1,24 @@
+# Kept on disk, never committed. Extracted vendor bundles, raw investigation
+# output, API probe responses, and separate projects that happen to live
+# alongside this one.
+local/
+
+# Runtime secrets and state. relay.json carries the channel's symmetric key.
+relay.json
+.relay-state.json
+.env
+.env.*
+.credentials.json
+.claude.json
+
+# Files received over the mailbox channel.
+inbox/
+
+# The virtualenv pins a newer cryptography than most systems ship.
+.venv/
+venv/
+
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store

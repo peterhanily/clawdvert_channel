@@ -1,0 +1,20 @@
+services:
+  realm-relay:
+    build: .
+    restart: unless-stopped
+    environment:
+      NONCE_SECRET: ${NONCE_SECRET:?set NONCE_SECRET in .env}
+      RELAY_REALM: ${RELAY_REALM:-realm-relay}
+      RELAY_START_PORT: 3478
+      RELAY_LANES: 6
+      PERSIST_MESSAGES: ${PERSIST_MESSAGES:-false}
+      MESSAGE_STORE: /data/events.jsonl
+    ports:
+      - "3478-3483:3478-3483/udp"
+      - "127.0.0.1:8080:8080/tcp"
+    volumes:
+      - relay-data:/data
+
+volumes:
+  relay-data:
+

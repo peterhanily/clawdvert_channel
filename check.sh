@@ -142,6 +142,14 @@ EOF
   else bad "$(basename "$f") missing ids" "$missing"; fi
 done
 
+if have node && [ -f realm/tools/build-auto-answer-bundle.mjs ]; then
+  if err=$(node realm/tools/build-auto-answer-bundle.mjs --check 2>&1); then
+    ok "clawdvert_channel.html auto-answer bundle is current"
+  else
+    bad "clawdvert_channel.html auto-answer bundle" "$err"
+  fi
+fi
+
 echo
 echo "prose"
 for f in README.md docs/*.md; do

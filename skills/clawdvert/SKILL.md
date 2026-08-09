@@ -5,38 +5,43 @@ description: Deploy, test and operate a clawdvert relay, publish the browser cli
 
 # clawdvert
 
-Two things live in this repository and they are easy to confuse.
+Two network services live in this repository and they are easy to confuse.
 
-**The TURN relay** carries WebRTC media for the browser client. It is coturn. It never sees message
-contents, only addresses and volume, because what it forwards is already encrypted by DTLS.
+**The TURN relay** carries WebRTC data for the browser client when direct ICE cannot cross the two
+NATs. It is coturn. On a host shared with the signalling relay, it listens on UDP/TCP 3488 and uses
+UDP 49160-49200 for allocations. It sees addresses and traffic volume, not data-channel plaintext,
+because the traffic it forwards is already encrypted by DTLS.
 
-**The mailbox relay** is a separate STUN based channel that carries small payloads inside STUN
-attributes. It is slow, measured at roughly twelve bytes a second, and the relay reads everything
-in the clear.
-It is what Claude to Claude messaging runs on.
+**The signalling/mailbox relay** is a separate STUN-shaped channel on UDP 3478-3483. It carries
+small payloads inside synthetic address responses and never forwards WebRTC traffic. Legacy rr1
+messages are visible to the operator unless the application encrypts them. The browser's rr2
+automatic-answer value is independently HMAC-bound and AES-GCM encrypted, so the relay sees its
+routing metadata, timing, volume, and ciphertext. Claude-to-Claude mailbox messaging can also use
+this carrier.
 
-Do not deploy one when the task calls for the other.
+Automatic answer return and WebRTC routing are complementary: a cellular-to-home session commonly
+uses rr2 to return the answer and coturn to carry the resulting data channel. Do not substitute one
+for the other, and do not bind coturn to 3478 on a co-hosted deployment.
 
 ## Decide what is needed
 
-Run this first. It answers the only question that matters, which is whether the two machines can
-reach each other directly.
+Run this against coturn when diagnosing the WebRTC path:
 
 ```bash
-python3 skills/clawdvert/scripts/relay_check.py --host <turn-host> --port 3478 \
+python3 skills/clawdvert/scripts/relay_check.py --host <turn-host> --port 3488 \
   --user <user> --password <password>
 ```
 
 It reports, in order: DNS resolution, whether an unauthenticated Allocate draws a 401 challenge,
-whether an authenticated Allocate succeeds, and whether the relay refuses to forward to private
+whether an authenticated Allocate succeeds, and whether coturn refuses to forward to private
 address space. If the last check says a private range is reachable, stop and fix the config before
-using the relay for anything.
+using the TURN credential.
 
-Order of preference, and stop at the first that works:
+Evaluate the two paths independently:
 
-1. No relay. Works when at least one side has friendly NAT.
-2. TURN relay. Works between any two networks. Needs a host.
-3. Mailbox relay. Text only, slow, relay reads everything.
+1. **WebRTC route:** prefer direct ICE; provide coturn for carrier-grade or symmetric NAT.
+2. **Answer transfer:** use rr2 to eliminate the second manual code; retain the manual answer as an
+   emergency fallback.
 
 ## Deploy a TURN relay
 
@@ -52,8 +57,11 @@ Two failure modes account for most broken deployments:
   range, by default 49160 to 49200 UDP, must be open too. The symptom is an Allocate that succeeds
   and a connection that never carries traffic.
 
-Never put a credential into anything published. The browser client takes relay details at runtime
-and keeps them in `localStorage` precisely so they stay out of the artifact.
+Never put a real credential into the repository, docs, or published HTML. The browser accepts TURN
+details at runtime and keeps them in `localStorage`, so they stay out of artifact source. When **Put
+these details in invites** is enabled, the complete invite carries that credential to the joining
+device; treat the invite as bearer-sensitive. Prefer short-lived credentials before broad exposure,
+or rotate the static credential after testing.
 
 ## Deploy the mailbox relay
 
@@ -64,6 +72,33 @@ cd realm
 
 Ships the relay, builds its container, starts it. It publishes UDP 3478 to 3483 and binds its
 health endpoint to localhost only. Open those six UDP ports to the addresses that need them.
+
+The deploy script excludes and preserves an existing remote `.env`. A code deploy does not turn rr2
+on or change a TTL already set there. A browser automatic-answer deployment needs this non-secret
+configuration in the host's private `.env`:
+
+```dotenv
+PERSIST_MESSAGES=false
+RENDEZVOUS_V2_SLOTS=true
+RENDEZVOUS_V2_SLOT_TTL_MS=300000
+RENDEZVOUS_V2_TERMINAL_TTL_MS=300000
+RENDEZVOUS_V2_READER_LEASE_MS=60000
+```
+
+Do not copy or print `NONCE_SECRET`; the script creates it on the host only when `.env` does not
+exist. Applying changed environment values requires a container recreate, which clears every
+in-memory rr1 room and rr2 slot. Do it outside an active pairing attempt.
+
+Verify the SSH-only health endpoint reports six lanes, persistence false, rr2 enabled, and zero
+internal errors. Then run the actual latest-value lifecycle from an admitted source address:
+
+```bash
+node realm/relay/tools/relay-smoke.mjs --host <signalling-host> --rr2
+```
+
+Use `--expect-rr2-disabled` only when testing an intentionally dark deployment. The source default
+is false; the currently published automatic-answer client requires a relay where it is explicitly
+enabled.
 
 ## Publish the browser client
 
@@ -113,8 +148,10 @@ Read the client's event log first. These are the signatures worth knowing.
 | What the log says | What it means | What to do |
 | --- | --- | --- |
 | `701 STUN host lookup received error` | DNS failed for the server. Not a NAT problem. | Check the network. A blocked or captive DNS breaks every server at once. |
-| Gathering completes with only `typ host` | No route exists. Any code produced now cannot connect. | Add a relay. |
-| `No route found after 20s` | ICE never found a working pair. | Confirm the relay ports and that the client's public IP is allowed. |
+| Gathering completes with only `typ host` | No routable ICE candidate was found. | Configure and test coturn. |
+| `Automatic answer return ... disabled` or rr2 response 43 | The signalling service is reachable but the running container has rr2 off. | Inspect loopback `/health`, set `RENDEZVOUS_V2_SLOTS=true` in the private host `.env`, and recreate outside an active pairing. |
+| `Answer sent · waiting for acknowledgement` does not advance | The phone stored its encrypted answer but the inviter has not read and ACKed it. | Keep both current artifact pages open; admit both current source IPs to UDP 3478-3483. |
+| Automatic return succeeds, then `No route found` | Signalling worked but ICE found no direct or TURN path. | Check the separate coturn credential, UDP/TCP 3488, UDP 49160-49200, `external-ip`, and both source allowlists. |
 | Allocate returns a private relayed address | `external-ip` is wrong. | Set `external-ip=PUBLIC/PRIVATE` and restart. |
 | Allocate succeeds, no traffic flows | The relay allocation range is closed. | Open 49160 to 49200 UDP. |
 
@@ -123,12 +160,18 @@ to one range will fail intermittently and look like a client bug. If the relay m
 arbitrary users, the credential and the quotas are the boundary, not the allowlist. Decide which
 posture is intended before widening anything.
 
+For an allowlisted deployment, remember that both devices need UDP 3478-3483 for rr2, while coturn
+separately needs UDP/TCP 3488 and UDP 49160-49200. Opening only the listener port can produce a relay
+candidate that never carries traffic.
+
 ## Scripts
 
 - `scripts/relay_check.py`, end to end TURN verification, including the private range refusal test
+- `../../realm/relay/tools/relay-smoke.mjs`, rr1/rr2 six-lane protocol and health verification
 
 ## Related
 
-- [docs/deploy-relay.md](../../docs/deploy-relay.md), ordered deployment guide
+- [docs/deploy-relay.md](../../docs/deploy-relay.md), signalling and TURN operator guide
+- [docs/auto-answer-return.md](../../docs/auto-answer-return.md), shipped one-invite pairing protocol
 - [docs/mailbox.md](../../docs/mailbox.md), the channel protocol and flow control
 - [docs/frame-api.md](../../docs/frame-api.md), the artifact API this is built on

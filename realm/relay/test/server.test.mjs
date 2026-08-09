@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import dgram from "node:dgram";
+import fs from "node:fs";
 import net from "node:net";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import {
   ATTRIBUTE,
@@ -117,6 +120,122 @@ test("the UDP relay also returns a standard STUN binding response", { timeout: 1
   assert.ok(mapped.port > 0);
 });
 
+test("rr2 is an explicit disabled frame unless the dormant flag is enabled", { timeout: 15_000 }, async (context) => {
+  const relayPort = await freeUdpPort();
+  const healthPort = await freeTcpPort();
+  const child = spawn(process.execPath, ["server.mjs"], {
+    cwd: new URL("..", import.meta.url),
+    env: {
+      ...process.env,
+      RELAY_BIND: "127.0.0.1",
+      RELAY_START_PORT: String(relayPort),
+      RELAY_LANES: "1",
+      HEALTH_PORT: String(healthPort),
+      NONCE_SECRET: "test-secret",
+      PERSIST_MESSAGES: "false",
+      RENDEZVOUS_V2_SLOTS: "false",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  context.after(() => child.kill("SIGTERM"));
+  await waitForOutput(child, "Realm Relay lane 0");
+
+  const frame = await allocate(relayPort, rr2Username({ operation: "get" }), "aabbccddeeff0011");
+  assert.deepEqual(frame, { kind: "error", code: 3, value: 0 });
+});
+
+test("rr2 serves late readers, acknowledges slots, and never enters persistence", { timeout: 20_000 }, async (context) => {
+  const relayPort = await freeUdpPort();
+  const healthPort = await freeTcpPort();
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "realm-relay-rr2-"));
+  const persistenceFile = path.join(temporary, "events.jsonl");
+  const child = spawn(process.execPath, ["server.mjs"], {
+    cwd: new URL("..", import.meta.url),
+    env: {
+      ...process.env,
+      RELAY_BIND: "127.0.0.1",
+      RELAY_START_PORT: String(relayPort),
+      RELAY_LANES: "1",
+      HEALTH_PORT: String(healthPort),
+      NONCE_SECRET: "test-secret",
+      PERSIST_MESSAGES: "true",
+      MESSAGE_STORE: persistenceFile,
+      RENDEZVOUS_V2_SLOTS: "true",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  context.after(() => child.kill("SIGTERM"));
+  context.after(() => fs.rmSync(temporary, { recursive: true, force: true }));
+  await waitForOutput(child, "Realm Relay lane 0");
+
+  const token = Buffer.from([0, 1, 2, 0, 0, 255, 17]);
+  const stored = await allocate(relayPort, rr2Username({
+    operation: "put",
+    payload: token,
+  }), "aabbccddeeff0011");
+  assert.deepEqual(stored, { kind: "slot-control", status: 51, revision: 1 });
+
+  const chunks = [];
+  for (let chunk = 0; chunk < 100; chunk += 1) {
+    const frame = await allocate(relayPort, rr2Username({
+      actor: "66778899aabb",
+      attempt: "0",
+      operation: "discover",
+      chunk,
+    }), "aabbccddeeff0011");
+    assert.equal(frame.kind, "data");
+    chunks.push(frame.payload);
+    if (frame.final) break;
+  }
+  const decoded = Buffer.from(Buffer.concat(chunks).toString("ascii"), "base64url");
+  assert.equal(decoded.subarray(0, 8).toString("hex"), "0011223344556677");
+  assert.equal(decoded.subarray(8, 16).toString("hex"), "8899aabbccddeeff");
+  assert.equal(decoded.subarray(16, 32).toString("hex"), "0123456789abcdeffedcba9876543210");
+  assert.equal(String.fromCharCode(decoded[32]), "o");
+  assert.equal(decoded.readUInt32BE(33), 1);
+  assert.deepEqual(decoded.subarray(37), token);
+
+  const acknowledged = await allocate(relayPort, rr2Username({
+    actor: "66778899aabb",
+    operation: "ack",
+    revision: 1,
+  }), "aabbccddeeff0011");
+  assert.deepEqual(acknowledged, { kind: "slot-control", status: 53, revision: 1 });
+
+  const health = await fetch(`http://127.0.0.1:${healthPort}/health`).then((response) => response.json());
+  assert.equal(health.rooms, 0);
+  assert.equal(health.events, 0);
+  assert.equal(health.rendezvousV2.enabled, true);
+  assert.equal(health.rendezvousV2.acked, 1);
+  assert.equal(fs.existsSync(persistenceFile), false);
+});
+
+function rr2Username({
+  actor = "001122334455",
+  from = "0011223344556677",
+  to = "8899aabbccddeeff",
+  attempt = "0123456789abcdeffedcba9876543210",
+  role = "o",
+  operation,
+  revision = 0,
+  chunk = 0,
+  payload = Buffer.alloc(0),
+}) {
+  return [
+    "rr2",
+    "aabbccddeeff0011",
+    actor,
+    from,
+    to,
+    attempt,
+    role,
+    operation,
+    revision.toString(36),
+    chunk.toString(36),
+    payload.length ? payload.toString("base64url") : "0",
+  ].join(".");
+}
+
 async function allocate(port, username, password) {
   const transactionId = crypto.randomBytes(12);
   const request = buildMessage({
@@ -165,6 +284,12 @@ function decodeFrame(attributeValue) {
   }
   if (header >= 30 && header <= 35) {
     return { kind: "data", payload: bytes.subarray(1, 1 + header - 30), final: true };
+  }
+  if (header >= 41 && header <= 49) {
+    return { kind: "error", code: header - 40, value: bytes.readUInt32BE(1) };
+  }
+  if (header >= 50 && header <= 54) {
+    return { kind: "slot-control", status: header, revision: bytes.readUInt32BE(1) };
   }
   return { kind: "other", header };
 }

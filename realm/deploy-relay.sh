@@ -39,7 +39,8 @@ rsync -a --delete \
 
 echo "==> ensuring a NONCE_SECRET exists on the host"
 # Generated on the host and never printed here, so it stays out of local shell
-# history and scrollback. Left alone if already present.
+# history and scrollback. The complete existing .env is left alone: deploying
+# source must never silently enable rr2 or replace an operator-selected TTL.
 ssh_run "cd $REMOTE_DIR && \
   if [ ! -f .env ]; then \
     printf 'NONCE_SECRET=%s\nRELAY_REALM=realm-relay\nPERSIST_MESSAGES=false\n' \
@@ -47,6 +48,7 @@ ssh_run "cd $REMOTE_DIR && \
   else echo '    .env already present, leaving it'; fi"
 
 echo "==> building and starting"
+echo "    note: replacing the container clears in-memory rr1 rooms and rr2 slots"
 ssh_run "cd $REMOTE_DIR && docker compose up -d --build"
 
 echo "==> health check on the host"
@@ -62,13 +64,18 @@ cat <<EOF
 
 Deployed. Verify reachability from here, which also tests the security group:
 
-  python3 local/stunping.py $HOSTNAME_ONLY
+  node "$SRC/tools/relay-smoke.mjs" --host $HOSTNAME_ONLY --rr2
+
+If /health reports rendezvousV2.enabled=false by design, use
+--expect-rr2-disabled instead of --rr2. The script preserved the remote .env;
+deploying code does not change that flag or an explicit TTL.
 
 A running relay answers every lane with a binding success or a 401. Silence on
 all six means the security group is not admitting UDP 3478-3483 from this
 address.
 
-Restrict those ports to the addresses that need them. An open TURN relay is an
-open packet forwarder, and the rate limiter in server.mjs bounds how fast one
-source can shout rather than which sources may shout at all.
+Restrict those signalling ports to the addresses that need them. The token
+bucket in server.mjs bounds how fast one source can send; it is not an access
+control list. This service is not the coturn data relay. On a co-hosted setup,
+coturn belongs on UDP/TCP 3488 with its UDP allocation range opened separately.
 EOF

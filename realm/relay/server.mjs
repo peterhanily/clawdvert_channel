@@ -17,8 +17,14 @@ import {
   makeControlFrame,
   makeDataFrame,
   makeErrorFrame,
+  makeSlotControlFrame,
+  makeSlotPayload,
+  parseRendezvousUsername,
   parseUsername,
+  SLOT_CONTROL,
+  SLOT_ERROR,
 } from "./lib/protocol.mjs";
+import { RendezvousSlotStore } from "./lib/rendezvous-slots.mjs";
 import { RoomStore } from "./lib/rooms.mjs";
 
 const REALM = process.env.RELAY_REALM || "realm-relay";
@@ -27,9 +33,13 @@ const START_PORT = numberEnv("RELAY_START_PORT", 3478, 1, 65529);
 const LANES = numberEnv("RELAY_LANES", 6, 1, 12);
 const HEALTH_PORT = numberEnv("HEALTH_PORT", 8080, 1, 65535);
 const NONCE_SECRET = process.env.NONCE_SECRET || crypto.randomBytes(32).toString("hex");
+const RATE_PER_SECOND = numberEnv("RELAY_RATE_PER_SECOND", 120, 12, 2000);
+const RATE_BURST = Math.max(RATE_PER_SECOND,
+  numberEnv("RELAY_RATE_BURST", 240, 12, 4000));
 const persistencePath = process.env.PERSIST_MESSAGES === "true"
   ? process.env.MESSAGE_STORE || "/data/events.jsonl"
   : null;
+const RENDEZVOUS_V2_SLOTS = process.env.RENDEZVOUS_V2_SLOTS === "true";
 
 // Off unless asked for. A relay that logs every source address it sees is a
 // different service from the one this repository otherwise describes, so
@@ -51,8 +61,16 @@ function recordSighting(remote, lane, token) {
 }
 
 const rooms = new RoomStore({ persistencePath });
+const rendezvousSlots = new RendezvousSlotStore({
+  maxSlots: numberEnv("RENDEZVOUS_V2_MAX_SLOTS", 1000, 1, 100_000),
+  maxSlotsPerRoom: numberEnv("RENDEZVOUS_V2_MAX_SLOTS_PER_ROOM", 64, 1, 1000),
+  slotTtlMs: numberEnv("RENDEZVOUS_V2_SLOT_TTL_MS", 300_000, 10_000, 300_000),
+  terminalTtlMs: numberEnv("RENDEZVOUS_V2_TERMINAL_TTL_MS", 300_000, 1000, 300_000),
+  readerLeaseMs: numberEnv("RENDEZVOUS_V2_READER_LEASE_MS", 60_000, 10_000, 180_000),
+});
 const sockets = [];
 const limits = new Map();
+let rendezvousV2InternalErrors = 0;
 
 for (let lane = 0; lane < LANES; lane += 1) {
   const socket = dgram.createSocket("udp4");
@@ -79,14 +97,25 @@ const health = http.createServer((request, response) => {
     return;
   }
   response.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
-  response.end(JSON.stringify({ ok: true, lanes: LANES, stun: true, persistence: Boolean(persistencePath), ...rooms.stats() }));
+  response.end(JSON.stringify({
+    ok: true,
+    lanes: LANES,
+    stun: true,
+    rateLimit: { perSecond: RATE_PER_SECOND, burst: RATE_BURST },
+    persistence: Boolean(persistencePath),
+    ...rooms.stats(),
+    rendezvousV2: RENDEZVOUS_V2_SLOTS
+      ? { enabled: true, ...rendezvousSlots.stats(), internalErrors: rendezvousV2InternalErrors }
+      : { enabled: false },
+  }));
 });
 health.listen(HEALTH_PORT, HOST, () => console.log(`Health check listening on http://${HOST}:${HEALTH_PORT}/health`));
 
 const maintenance = setInterval(() => {
   rooms.pruneAll();
+  rendezvousSlots.pruneAll();
   const cutoff = Date.now() - 60_000;
-  for (const [key, value] of limits) if (value.window < cutoff) limits.delete(key);
+  for (const [key, value] of limits) if (value.lastSeenAt < cutoff) limits.delete(key);
 }, 10_000);
 maintenance.unref();
 
@@ -141,7 +170,9 @@ function handlePacket(socket, lane, packet, remote) {
     return;
   }
 
-  const envelope = parseUsername(username);
+  const mailboxEnvelope = parseUsername(username);
+  const rendezvousEnvelope = parseRendezvousUsername(username);
+  const envelope = mailboxEnvelope || rendezvousEnvelope;
   if (!envelope) {
     sendError(socket, message, remote, 400, "Bad mailbox envelope");
     return;
@@ -159,18 +190,31 @@ function handlePacket(socket, lane, packet, remote) {
     return;
   }
 
-  const touched = rooms.touch(envelope);
   let frame;
-  if (touched.error === "room-full") {
-    frame = makeErrorFrame(1, touched.room.sequence);
-  } else {
-    const result = rooms.response(touched.room, envelope.sequence);
-    if (result.kind === "control") {
-      frame = makeControlFrame(result.latestSequence, result.online);
-    } else if (result.kind === "missing") {
-      frame = makeErrorFrame(2, result.oldest);
+  if (rendezvousEnvelope) {
+    if (!RENDEZVOUS_V2_SLOTS) {
+      frame = makeErrorFrame(SLOT_ERROR.DISABLED);
     } else {
-      frame = makeDataFrame(result.event.payload, envelope.chunkBase + lane);
+      try {
+        frame = rendezvousFrame(rendezvousSlots.execute(rendezvousEnvelope), rendezvousEnvelope, lane);
+      } catch {
+        rendezvousV2InternalErrors += 1;
+        frame = makeErrorFrame(SLOT_ERROR.INTERNAL);
+      }
+    }
+  } else {
+    const touched = rooms.touch(mailboxEnvelope);
+    if (touched.error === "room-full") {
+      frame = makeErrorFrame(1, touched.room.sequence);
+    } else {
+      const result = rooms.response(touched.room, mailboxEnvelope.sequence);
+      if (result.kind === "control") {
+        frame = makeControlFrame(result.latestSequence, result.online);
+      } else if (result.kind === "missing") {
+        frame = makeErrorFrame(2, result.oldest);
+      } else {
+        frame = makeDataFrame(result.event.payload, mailboxEnvelope.chunkBase + lane);
+      }
     }
   }
 
@@ -192,6 +236,29 @@ function handlePacket(socket, lane, packet, remote) {
     integrityKey: key,
   });
   socket.send(response, remote.port, remote.address);
+}
+
+function rendezvousFrame(result, envelope, lane) {
+  if (result.kind === "empty") return makeSlotControlFrame(SLOT_CONTROL.EMPTY, result.revision);
+  if (result.kind === "stored") return makeSlotControlFrame(SLOT_CONTROL.STORED, result.revision);
+  if (result.kind === "not-modified") {
+    return makeSlotControlFrame(SLOT_CONTROL.NOT_MODIFIED, result.revision);
+  }
+  if (result.kind === "acked") return makeSlotControlFrame(SLOT_CONTROL.ACKED, result.revision);
+  if (result.kind === "aborted") return makeSlotControlFrame(SLOT_CONTROL.ABORTED, result.revision);
+  if (result.kind === "data") {
+    const payload = makeSlotPayload(result);
+    return makeDataFrame(payload, envelope.chunkBase + lane);
+  }
+
+  const code = {
+    full: SLOT_ERROR.FULL,
+    forbidden: SLOT_ERROR.FORBIDDEN,
+    missing: SLOT_ERROR.MISSING,
+    conflict: SLOT_ERROR.CONFLICT,
+    "bad-operation": SLOT_ERROR.BAD_OPERATION,
+  }[result.error] || SLOT_ERROR.INTERNAL;
+  return makeErrorFrame(code, result.revision);
 }
 
 function sendError(socket, message, remote, code, reason) {
@@ -236,10 +303,19 @@ function validNonce(value, address) {
 function allow(address) {
   const timestamp = Date.now();
   let value = limits.get(address);
-  if (!value || timestamp - value.window >= 1000) value = { window: timestamp, count: 0 };
-  value.count += 1;
+  if (!value) value = { tokens: RATE_BURST, updatedAt: timestamp, lastSeenAt: timestamp };
+  const elapsed = Math.max(0, timestamp - value.updatedAt);
+  value.tokens = Math.min(RATE_BURST,
+    value.tokens + (elapsed * RATE_PER_SECOND) / 1000);
+  value.updatedAt = timestamp;
+  value.lastSeenAt = timestamp;
+  if (value.tokens < 1) {
+    limits.set(address, value);
+    return false;
+  }
+  value.tokens -= 1;
   limits.set(address, value);
-  return value.count <= 80;
+  return true;
 }
 
 function normaliseRemoteAddress(value) {

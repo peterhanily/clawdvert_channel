@@ -147,7 +147,8 @@ def main(argv=None):
             preview["slug"] = slug
         if args.description:
             preview["description"] = args.description
-        print(f"(token from {session.token_source})\nDRY RUN, nothing sent.\n")
+        source = frames.credential_source_label(session.token_source)
+        print(f"(token from {source})\nDRY RUN, nothing sent.\n")
         print(f"POST {frames.API_BASE}/api/frame/deploy/direct")
         for k, v in session.headers().items():
             print(f"{k}: {'Bearer <REDACTED>' if k == 'Authorization' else v}")

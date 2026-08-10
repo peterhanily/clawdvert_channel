@@ -57,12 +57,15 @@ RETRYABLE = {"missing_row", "incomplete", "generation_mismatch", "upload_window_
 
 
 class FrameError(Exception):
-    """Anything the control plane refused, carrying its status and body."""
+    """Anything the control plane refused, without retaining response bodies."""
 
     def __init__(self, message, status=None, body=None):
         super().__init__(message)
         self.status = status
-        self.body = body
+        # Provider error bodies can contain account data or echoed credentials.
+        # Keep the argument for call-site compatibility, but never retain it.
+        del body
+        self.body = None
 
 
 # --- credentials -------------------------------------------------------------
@@ -106,6 +109,26 @@ def read_token():
     raise FrameError(
         "no OAuth token found. Run `claude setup-token` and export "
         "CLAUDE_CODE_OAUTH_TOKEN, or log in with `claude` first.")
+
+
+def credential_source_label(source, caller_supplied=False):
+    """Describe a credential source without exposing local filesystem paths."""
+
+    if caller_supplied:
+        return "caller"
+    try:
+        raw = str(source or "")
+    except Exception:
+        return "Claude Code credential"
+    if raw == "CLAUDE_CODE_OAUTH_TOKEN":
+        return "environment"
+    if raw == "macOS Keychain":
+        return "macOS Keychain"
+    if raw == "caller":
+        return "caller"
+    if raw.endswith("/.credentials.json") or raw.endswith("\\.credentials.json"):
+        return "Claude credentials file"
+    return "Claude Code credential"
 
 
 def org_uuid(session=None):
@@ -190,7 +213,6 @@ class Session:
         """
         payload = (json.dumps(body, ensure_ascii=False).encode("utf-8")
                    if body is not None else None)
-        last = None
         for attempt in range(retries + 1):
             try:
                 with self._lock:
@@ -210,13 +232,12 @@ class Session:
                     return status, (json.loads(text) if text else {}), hdrs
                 except ValueError:
                     return status, text, hdrs
-            except (http.client.HTTPException, OSError) as exc:
-                last = exc
+            except (http.client.HTTPException, OSError):
                 self.close()
                 self.reconnects += 1
                 if attempt < retries:
                     time.sleep(0.4 * (attempt + 1))
-        raise FrameError(f"{method} {path} failed: {last}")
+        raise FrameError("Claude request failed after bounded retries")
 
 
 # --- frame operations --------------------------------------------------------
@@ -235,7 +256,7 @@ def compose(body_html):
 def slug_from_url(url):
     m = URL_RE.match(url)
     if not m:
-        raise FrameError(f"no artifact slug in {url!r}")
+        raise FrameError("no artifact slug in the supplied URL")
     return m.group(1)
 
 
@@ -269,9 +290,9 @@ def publish(session, page, title, favicon="\U0001f4c4", slug=None,
     if status == 401:
         raise FrameError("token expired; run any `claude` command, then retry", status, data)
     if not (200 <= status < 300):
-        raise FrameError(f"publish failed: HTTP {status} {str(data)[:200]}", status, data)
+        raise FrameError(f"publish failed: HTTP {status}", status, data)
     if not isinstance(data, dict) or not data.get("slug") or not data.get("version"):
-        raise FrameError(f"incomplete deploy response: {str(data)[:200]}", status, data)
+        raise FrameError("incomplete deploy response", status, data)
     return data
 
 
@@ -300,7 +321,7 @@ def frames(session, limit=200):
 def delete(session, slug):
     status, data, _ = session.request("DELETE", f"/api/frame/{slug}")
     if status not in (200, 204):
-        raise FrameError(f"delete failed: HTTP {status} {str(data)[:200]}", status, data)
+        raise FrameError(f"delete failed: HTTP {status}", status, data)
     return True
 
 
@@ -402,6 +423,6 @@ def set_audience(session, slug, mode, attempts=5, on_wait=None):
             time.sleep(wait)
             continue
         if status == 409:
-            raise FrameError(f"refused: {reason or str(data)[:200]}", status, data)
-        raise FrameError(f"perm update failed: HTTP {status} {str(data)[:200]}", status, data)
+            raise FrameError("permission update was refused", status, data)
+        raise FrameError(f"permission update failed: HTTP {status}", status, data)
     raise FrameError("gave up waiting for the artifact to become shareable")

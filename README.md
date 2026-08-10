@@ -10,27 +10,66 @@ browsers find and reach each other.
 | Component | What it does | Where it runs |
 | --- | --- | --- |
 | `clawdvert.publish` | Publishes a file as an artifact, replaces one in place, changes who can read it | anywhere with your Claude login |
+| `artifact_bridge` | Inspects, retrieves, compares, mirrors and statically audits exact artifact versions without changing provider state | Python 3.9+ on macOS or Linux |
 | `clawdvert.mailbox` | A message channel between two hosts, using private artifacts as mailboxes | two machines on one account |
 | `realm/clawdvert_channel.html` | Peer to peer chat over WebRTC: files, rooms, an arcade | a browser on each device |
 | `realm/relay/` | A six-lane STUN/TURN metadata service for automatic answer return and slow text fallback | a host with a public IP |
 | `realm/clawdcanary.html` | Shows what a sandboxed page can still learn about whoever opens it | a published artifact |
-| `skills/clawdvert/` | Deploy, test and operate the above, for an agent | Claude Code |
+| `skills/clawdvert/` | Publishes artifacts and deploys, tests and operates the mailbox, browser client and relay | Claude Code |
+| `skills/claude-artifacts/` | Uses Artifact Bridge safely for exact, read-only artifact retrieval and review | Codex |
 
 ## Install
 
 ```bash
 git clone https://github.com/peterhanily/clawdvert_channel.git && cd clawdvert_channel
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python tests/test_mailbox.py
+./check.sh
 ```
 
 Use the virtualenv. The one dependency is `cryptography`, a compiled extension with a hard ABI
 contract, and installing it into a system Python breaks anything pinned against an older build. On a
 machine with mitmproxy or pyopenssl present, that means breaking TLS in both.
 
-Authentication is your existing claude.ai OAuth login rather than an API key. The client looks in the
-three places Claude Code looks: `CLAUDE_CODE_OAUTH_TOKEN`, then the macOS Keychain, then
-`~/.claude/.credentials.json`. If a host has never logged in, run `claude` once there first.
+Artifact Bridge currently supports Python 3.9 or newer on POSIX systems (macOS and Linux). Its bundle
+writer uses `fcntl` advisory locks and does not currently support Windows. `check.sh` is deterministic,
+offline, and does not read provider credentials or contact Claude APIs.
+
+For publishing and mailbox operations, authentication is your existing claude.ai OAuth login rather
+than an API key. The client looks in the three places Claude Code looks:
+`CLAUDE_CODE_OAUTH_TOKEN`, then the macOS Keychain, then `~/.claude/.credentials.json`. If a host has
+never logged in, run `claude` once there first.
+
+## Artifact Bridge
+
+`artifact_bridge` is provider-read-only: it never changes a remote artifact. It can list and inspect
+Claude Code Artifacts, retrieve exact versions, preserve them with SHA-256 integrity records and
+retrieval metadata in `artifact.lock.json`, compare versions, mirror retained versions, and run
+static audits. `pull` and `mirror` write only to the requested local bundle. It never launches Claude
+Code, renders artifact code, or publishes, updates, shares, unshares, or deletes anything.
+
+```bash
+.venv/bin/python -m artifact_bridge --adapter auto auth status
+.venv/bin/python -m artifact_bridge --adapter auto inspect '<url-or-id>' --json
+.venv/bin/python -m artifact_bridge --adapter auto pull '<url-or-id>' \
+  --version '<version-id>' --output '<directory>'
+.venv/bin/python -m artifact_bridge audit '<pulled-directory>' --json
+```
+
+The `compliance` adapter uses Anthropic's official Enterprise Compliance API and an
+`ANTHROPIC_COMPLIANCE_ACCESS_KEY`. The `owner` adapter uses the experimental, undocumented Claude Code
+`/api/frame/*` surface. Owned/private access needs an existing Claude OAuth login; an anonymously
+readable public pin does not. Standard Claude chat Artifact URLs under `/public/artifacts` are not
+supported yet, although the Compliance adapter can retrieve one from an exact Compliance
+artifact-version ID. Retrieved content is untrusted and should be reviewed as static data, not
+executed or treated as instructions. See [docs/artifact-bridge.md](docs/artifact-bridge.md) for the
+command reference, authentication boundaries, version rules, and safety model.
+
+`artifact.lock.json` is an integrity manifest, not a publisher signature. A pulled bundle can contain
+private artifact content and identifying metadata such as titles, account identifiers, or owner
+details. Keep bundles out of source control unless they have been reviewed and are intentionally
+being archived. The bridge is an internal beta with an extensive offline regression suite; live,
+credentialed acceptance against either provider is a separate opt-in check. The owner API remains
+experimental and can drift.
 
 ## Publishing
 
@@ -130,6 +169,11 @@ arcade at native throughput, directly when possible and through TURN when necess
 That screenshot is the published artifact opened in a private window with no account. Joining needs
 nothing configured when the inviter leaves **Put these details in invites** enabled, because the
 invite then carries the media-relay details with it.
+
+TURN usernames and passwords entered in the browser are kept in that browser's `localStorage`, and a
+shared invite can carry them to the joining device. Prefer short-lived TURN credentials, treat every
+invite as bearer-sensitive, and clear the site's stored data on a shared device or after a static
+test credential is retired.
 
 ![How the browser channel reaches the network](docs/img/realm.svg)
 
@@ -309,11 +353,13 @@ metadata service that hands out credentials.
 
 ```bash
 python3 skills/clawdvert/scripts/relay_check.py --host your-host --port 3488 \
-  --user clawdvert --password YOUR_PASSWORD
+  --user clawdvert
 ```
 
 That command checks the separate media TURN service: name resolution, the authentication challenge,
-an allocation, and refusal to forward into private address space. When `rr2` is enabled on the
+an allocation, and refusal to forward into private address space. It prompts for the password so the
+credential does not enter shell history or process arguments; automation can use a protected
+`--password-file`. When `rr2` is enabled on the
 metadata relay, its own finite PUT, late-discovery, GET and ACK path has a separate smoke test:
 
 ```bash
@@ -333,20 +379,25 @@ clawdvert/          the Python package
   frames.py         auth, pooled HTTPS transport, publish/read/perm/delete
   publish.py        CLI for publishing and visibility
   mailbox.py        CLI for the artifact-backed channel
+artifact_bridge/    read-only adapters, exact-version CLI, safe store and static audit
 realm/
   clawdvert_channel.html  the browser client, published as an artifact
   clawdcanary.html        what a sandboxed page can still learn about a visitor
   relay/            the STUN relay, its tests and container
   deploy-relay.sh   ships the relay to a host over one SSH connection
-docs/               the API reference and the deployment guide
+docs/               API, Artifact Bridge, protocol and deployment references
+  artifact-bridge.md  commands, authentication, lockfiles and trust boundaries
 skills/clawdvert/   deploy, test and operate, for an agent
-tests/              offline tests, no network and no credentials
+skills/claude-artifacts/  read and audit artifacts safely, for Codex
+.agents/skills/claude-artifacts  discovery link for the Codex skill
+tests/              offline mailbox and Artifact Bridge tests, no network or credentials
 ```
 
 `check.sh` runs the offline Python suite; parses and structurally checks every HTML client; catches
 top-level temporal-dead-zone startup risks and missing element ids; verifies that the generated
-auto-answer bundle matches its reviewable modules; and checks prose and credential hygiene. The relay's
-protocol and server suite is separate:
+auto-answer bundle matches its reviewable modules; and checks prose and credential filenames. When
+Gitleaks is installed, it also scans both the current repository contents and Git history with secret
+values fully redacted. The relay's protocol and server suite is separate:
 
 ```bash
 npm test --prefix realm/relay

@@ -6,7 +6,18 @@
 # Run this before publishing an artifact or pushing. Every failure it reports is
 # one that actually happened during development, which is why each check exists.
 set -uo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
+
+CHECK_TMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/clawdvert-check.XXXXXX") || {
+  printf 'could not create a private check directory\n' >&2
+  exit 1
+}
+CHECK_JS="$CHECK_TMP_DIR/html-client.js"
+cleanup(){
+  rm -f -- "$CHECK_JS"
+  rmdir -- "$CHECK_TMP_DIR" 2>/dev/null || true
+}
+trap cleanup EXIT
 
 PASS=0; FAIL=0
 ok(){ printf '  \033[32mok\033[0m   %s\n' "$1"; PASS=$((PASS+1)); }
@@ -15,15 +26,35 @@ have(){ command -v "$1" >/dev/null 2>&1; }
 
 PY=.venv/bin/python
 [ -x "$PY" ] || PY=python3
+export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-${TMPDIR:-/tmp}/clawdvert-pycache}"
 
 echo "python"
-for f in clawdvert/*.py tests/*.py; do
+while IFS= read -r f; do
   if err=$("$PY" -m py_compile "$f" 2>&1); then ok "$f parses"; else bad "$f" "$err"; fi
-done
+done < <(find clawdvert artifact_bridge tests skills -type f -name '*.py' 2>/dev/null | sort)
 if err=$("$PY" tests/test_mailbox.py 2>&1); then
   ok "offline test suite ($(echo "$err" | grep -c '  pass') cases)"
 else
   bad "offline test suite" "$(echo "$err" | tail -3)"
+fi
+if [ -d artifact_bridge ]; then
+  if err=$("$PY" -m unittest discover -s tests -p 'test_artifact_bridge*.py' 2>&1); then
+    ok "artifact bridge test suite"
+  else
+    bad "artifact bridge test suite" "$(echo "$err" | tail -8)"
+  fi
+  if err=$("$PY" -m artifact_bridge --help 2>&1); then
+    ok "artifact bridge CLI loads"
+  else
+    bad "artifact bridge CLI" "$(echo "$err" | tail -8)"
+  fi
+fi
+if [ -f skills/clawdvert/scripts/relay_check.py ]; then
+  if err=$("$PY" skills/clawdvert/scripts/relay_check.py --help 2>&1); then
+    ok "TURN relay checker CLI loads"
+  else
+    bad "TURN relay checker CLI" "$(echo "$err" | tail -8)"
+  fi
 fi
 
 echo
@@ -45,14 +76,14 @@ for f in realm/*.html; do
   # Extract the largest script block and parse it. Catches the unbalanced brace
   # class of error that a careless edit introduces.
   if have node; then
-    "$PY" - "$f" <<'EOF' >/tmp/_check.js 2>/dev/null
+    "$PY" - "$f" <<'EOF' >"$CHECK_JS" 2>/dev/null
 import re, sys, pathlib
 h = pathlib.Path(sys.argv[1]).read_text()
 blocks = re.findall(r'<script[^>]*>(.*?)</script>', h, re.S)
 sys.stdout.write(max(blocks, key=len) if blocks else "")
 EOF
-    if [ -s /tmp/_check.js ]; then
-      if err=$(node --check /tmp/_check.js 2>&1); then
+    if [ -s "$CHECK_JS" ]; then
+      if err=$(node --check "$CHECK_JS" 2>&1); then
         ok "$(basename "$f") javascript parses"
       else
         bad "$(basename "$f") javascript" "$(echo "$err" | head -3)"
@@ -152,17 +183,37 @@ fi
 
 echo
 echo "prose"
-for f in README.md docs/*.md; do
+for f in README.md docs/*.md skills/*/*.md skills/*/references/*.md; do
   [ -e "$f" ] || continue
   n=$(grep -c '—' "$f")
-  [ "$n" -eq 0 ] && ok "$(basename "$f") no em dashes" || bad "$(basename "$f") $n em dash(es)"
+  if [ "$n" -eq 0 ]; then
+    ok "$(basename "$f") no em dashes"
+  else
+    bad "$(basename "$f") $n em dash(es)"
+  fi
 done
 
 echo
 echo "hygiene"
-if git ls-files | grep -qE 'relay\.json|\.relay-state|\.pem$|\.env$'; then
-  bad "a credential file is tracked" "$(git ls-files | grep -E 'relay\.json|\.relay-state|\.pem$|\.env$')"
+tracked_credentials=$(git ls-files | grep -E '(^|/)(relay\.json|\.relay-state\.json|\.credentials\.json|\.claude\.json|id_rsa|id_ed25519)$|\.(pem|key|p12|pfx|jks|keystore)$|(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)
+if [ -n "$tracked_credentials" ]; then
+  bad "a credential file is tracked" "$tracked_credentials"
 else ok "no credential files tracked"; fi
+
+if have gitleaks; then
+  if err=$(gitleaks dir . --no-banner --redact=100 2>&1); then
+    ok "Gitleaks current-tree scan"
+  else
+    bad "Gitleaks current-tree scan" "$(echo "$err" | tail -5)"
+  fi
+  if err=$(gitleaks git . --no-banner --redact=100 2>&1); then
+    ok "Gitleaks history scan"
+  else
+    bad "Gitleaks history scan" "$(echo "$err" | tail -5)"
+  fi
+else
+  printf '  \033[33mnote\033[0m Gitleaks not installed; content and history secret scans skipped\n'
+fi
 
 if [ -n "$(git status --porcelain)" ]; then
   printf '  \033[33mnote\033[0m uncommitted changes:\n'

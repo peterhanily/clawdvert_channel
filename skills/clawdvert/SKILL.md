@@ -29,13 +29,16 @@ Run this against coturn when diagnosing the WebRTC path:
 
 ```bash
 python3 skills/clawdvert/scripts/relay_check.py --host <turn-host> --port 3488 \
-  --user <user> --password <password>
+  --user <user>
 ```
 
 It reports, in order: DNS resolution, whether an unauthenticated Allocate draws a 401 challenge,
 whether an authenticated Allocate succeeds, and whether coturn refuses to forward to private
 address space. If the last check says a private range is reachable, stop and fix the config before
 using the TURN credential.
+
+The checker prompts without echo for the password. For non-interactive use, provide a protected
+`--password-file`; never place a TURN password in command arguments, logs, or committed files.
 
 Evaluate the two paths independently:
 

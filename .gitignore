@@ -13,6 +13,15 @@ relay.json
 !.env.example
 .credentials.json
 .claude.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+gitleaks-report.*
 
 # Files received over the mailbox channel.
 inbox/
@@ -24,4 +33,5 @@ venv/
 node_modules/
 __pycache__/
 *.pyc
+*.egg-info/
 .DS_Store

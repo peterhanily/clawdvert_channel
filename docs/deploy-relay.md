@@ -122,7 +122,7 @@ can bypass host-firewall assumptions, so verify the cloud rule rather than
 trusting UFW alone. A source-IP-restricted example is:
 
 ```bash
-aws --profile canary ec2 authorize-security-group-ingress \
+aws --profile your-profile ec2 authorize-security-group-ingress \
   --group-id sg-REPLACE_ME --ip-permissions \
   'IpProtocol=udp,FromPort=3488,ToPort=3488,IpRanges=[{CidrIp=CLIENT_IP/32}]' \
   'IpProtocol=tcp,FromPort=3488,ToPort=3488,IpRanges=[{CidrIp=CLIENT_IP/32}]' \
@@ -171,11 +171,13 @@ credential into documentation:
 ```bash
 python3 skills/clawdvert/scripts/relay_check.py \
   --host turn.example.com --port 3488 \
-  --user clawdvert --password YOUR_PASSWORD
+  --user clawdvert
 ```
 
 That checks DNS, the unauthenticated 401 challenge, an authenticated allocation,
-and refusal to forward into private address space.
+and refusal to forward into private address space. It prompts without echo for the password. For
+non-interactive use, pass a protected file through `--password-file`; never put the password itself
+on the command line.
 
 ### Managed TURN alternative
 
@@ -244,7 +246,7 @@ Open UDP 3478–3483 from both clients' current public addresses. These rules ar
 separate from coturn's 3488 and allocation-range rules:
 
 ```bash
-aws --profile canary ec2 authorize-security-group-ingress \
+aws --profile your-profile ec2 authorize-security-group-ingress \
   --group-id sg-REPLACE_ME --ip-permissions \
   'IpProtocol=udp,FromPort=3478,ToPort=3483,IpRanges=[{CidrIp=CLIENT_IP/32}]'
 ```

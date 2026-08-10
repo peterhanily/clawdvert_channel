@@ -1,0 +1,23 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public codec size arithmetic is not a token value"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''^realm/src/auto-answer-return\.js$''',
+  '''^realm/clawdvert_channel\.html$''',
+]
+regexes = [
+  '''MIN_TOKEN_BYTES = RENDEZVOUS_V2\.fixedBodyBytes \+ RENDEZVOUS_V2\.tagBytes''',
+]
+
+[[allowlists]]
+description = "Synthetic invalid PEM text exercises credential redaction"
+targetRules = ["private-key"]
+condition = "AND"
+regexTarget = "line"
+paths = ['''^tests/test_artifact_bridge_core\.py$''']
+regexes = ['''PEM-SECRET''']

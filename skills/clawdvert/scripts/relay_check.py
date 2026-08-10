@@ -14,6 +14,7 @@ instance metadata service.
 """
 
 import argparse
+import getpass
 import hashlib
 import hmac
 import ipaddress
@@ -80,14 +81,41 @@ def error_of(packet):
     return f"{body[2] * 100 + body[3]} {body[4:].decode('utf-8', 'replace')}"
 
 
+def read_password(args, parser):
+    if args.password_file:
+        try:
+            with open(args.password_file, "rb") as handle:
+                raw = handle.read(4097)
+        except OSError:
+            parser.error("could not read the TURN password file")
+        if len(raw) > 4096:
+            parser.error("TURN password file exceeds 4096 bytes")
+        try:
+            password = raw.decode("utf-8").rstrip("\r\n")
+        except UnicodeDecodeError:
+            parser.error("TURN password file is not valid UTF-8")
+    else:
+        try:
+            password = getpass.getpass("TURN password: ")
+        except (EOFError, KeyboardInterrupt):
+            parser.error("could not read a TURN password from the terminal")
+    if not password:
+        parser.error("TURN password must not be empty")
+    return password
+
+
 def main():
     ap = argparse.ArgumentParser(description="Verify a TURN relay end to end.")
     ap.add_argument("--host", required=True)
     ap.add_argument("--port", type=int, default=3478)
     ap.add_argument("--user", required=True)
-    ap.add_argument("--password", required=True)
+    ap.add_argument(
+        "--password-file",
+        help="read the TURN password from a bounded UTF-8 file instead of prompting",
+    )
     ap.add_argument("--timeout", type=float, default=6.0)
     args = ap.parse_args()
+    password = read_password(args, ap)
 
     failures = 0
 
@@ -119,7 +147,7 @@ def main():
         return 1
     print(f"ok    challenge    realm={realm.decode()}")
 
-    key = hashlib.md5(f"{args.user}:{realm.decode()}:{args.password}".encode()).digest()
+    key = hashlib.md5(f"{args.user}:{realm.decode()}:{password}".encode()).digest()
     auth = [attr(USERNAME, args.user.encode()), attr(REALM, realm), attr(NONCE, nonce)]
 
     sock.sendto(message(ALLOCATE, secrets.token_bytes(12), [transport] + auth, key), target)

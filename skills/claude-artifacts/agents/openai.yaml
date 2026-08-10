@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Artifacts"
+  short_description: "Inspect and pull versioned Claude artifacts"
+  default_prompt: "Use $claude-artifacts to inspect and pull this Claude artifact safely."

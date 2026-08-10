@@ -1,22 +1,29 @@
 # clawdvert_channel
 
-**A write-up of this work is coming soon on the [CaddyLabs blog](https://caddylabs.io/).**
+## Overview
 
-Claude Code publishes HTML pages as hosted artifacts on claude.ai. It does that through an internal
-API that turns out to be a single HTTP request. This repository is a client for that API, a browser
-chat client that runs as one of those artifacts, and the signalling and media relays that let two
-browsers find and reach each other.
+This repository is a collection of related but independently useful tools built around Claude-hosted
+artifacts. It contains artifact API clients, private artifact-backed messaging, browser applications,
+rendezvous protocols and infrastructure, and agent skills for operating those workflows.
 
-| Component | What it does | Where it runs |
+The components have deliberately different trust boundaries. `clawdvert` can publish and change
+provider state, while Artifact Bridge is provider-read-only. Browser traffic uses WebRTC: this
+repository implements the constrained rr1/rr2 signalling service, while coturn is a separately
+operated media relay configured and tested with the guidance here.
+
+## Contents
+
+| Area | What it contains | Start here |
 | --- | --- | --- |
-| `clawdvert.publish` | Publishes a file as an artifact, replaces one in place, changes who can read it | anywhere with your Claude login |
-| `artifact_bridge` | Inspects, retrieves, compares, mirrors and statically audits exact artifact versions without changing provider state | Python 3.9+ on macOS or Linux |
-| `clawdvert.mailbox` | A message channel between two hosts, using private artifacts as mailboxes | two machines on one account |
-| `realm/clawdvert_channel.html` | Peer to peer chat over WebRTC: files, rooms, an arcade | a browser on each device |
-| `realm/relay/` | A six-lane STUN/TURN metadata service for automatic answer return and slow text fallback | a host with a public IP |
-| `realm/clawdcanary.html` | Shows what a sandboxed page can still learn about whoever opens it | a published artifact |
-| `skills/clawdvert/` | Publishes artifacts and deploys, tests and operates the mailbox, browser client and relay | Claude Code |
-| `skills/claude-artifacts/` | Uses Artifact Bridge safely for exact, read-only artifact retrieval and review | Codex |
+| Setup and verification | Python environment, offline checks and secret scanning | [Install](#install) · [Verification](#verification) |
+| Artifact inspection | Exact-version, provider-read-only retrieval, mirroring, comparison and static audit | [Artifact Bridge](#artifact-bridge) · [reference](docs/artifact-bridge.md) |
+| Artifact publishing | Publish, replace and change visibility through the Frame API | [Publishing](#publishing) · [API notes](docs/frame-api.md) |
+| Host messaging | A private-artifact mailbox between two machines on one account | [Mailbox channel](#the-mailbox-channel) · [protocol](docs/mailbox.md) |
+| Browser messaging | WebRTC chat, files, rooms and the peer-synchronised arcade | [Browser channel](#the-browser-channel) · [automatic answer return](docs/auto-answer-return.md) |
+| Sandbox measurement | The inert browser-capability demonstration and optional canary | [clawdcanary](#clawdcanary) |
+| Relay infrastructure | The in-repo metadata rendezvous service plus deployment and external coturn guidance | [Running a relay](#running-a-relay) · [deployment guide](docs/deploy-relay.md) |
+| Protocol implementation | Shared API client, reviewable rendezvous modules and generated browser bundle | [Frame API](docs/frame-api.md) · [Rendezvous V2](docs/rendezvous-v2.md) · [source map](#repository-layout) |
+| Agent workflows | State-changing Clawdvert operations and read-only Artifact Bridge inspection | [Claude Code skill](skills/clawdvert/) · [Codex skill](skills/claude-artifacts/) |
 
 ## Install
 
@@ -368,11 +375,13 @@ node realm/relay/tools/relay-smoke.mjs relay.example.com --rr2
 
 ## Related
 
+**A longer write-up of this work is coming soon on the [CaddyLabs blog](https://caddylabs.io/).**
+
 <img src="docs/img/clawdary-tokens.png" alt="clawdary_tokens" width="300">
 
 `clawdary_tokens` is the sibling project that shares this repository's relay and publishing tooling.
 
-## Layout
+## Repository layout
 
 ```
 clawdvert/          the Python package
@@ -383,7 +392,9 @@ artifact_bridge/    read-only adapters, exact-version CLI, safe store and static
 realm/
   clawdvert_channel.html  the browser client, published as an artifact
   clawdcanary.html        what a sandboxed page can still learn about a visitor
-  relay/            the STUN relay, its tests and container
+  relay/            the rr1/rr2 signalling relay, its tests and container
+  src/              reviewable auto-answer and Rendezvous V2 protocol modules
+  tools/            reproducible browser-bundle generator
   deploy-relay.sh   ships the relay to a host over one SSH connection
 docs/               API, Artifact Bridge, protocol and deployment references
   artifact-bridge.md  commands, authentication, lockfiles and trust boundaries
@@ -392,6 +403,8 @@ skills/claude-artifacts/  read and audit artifacts safely, for Codex
 .agents/skills/claude-artifacts  discovery link for the Codex skill
 tests/              offline mailbox and Artifact Bridge tests, no network or credentials
 ```
+
+## Verification
 
 `check.sh` runs the offline Python suite; parses and structurally checks every HTML client; catches
 top-level temporal-dead-zone startup risks and missing element ids; verifies that the generated

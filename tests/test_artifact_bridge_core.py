@@ -268,6 +268,20 @@ class ModelAndClientTests(unittest.TestCase):
         safe = redact_text(marker * 5000 + "tail-secret")
         self.assertEqual(safe, "[REDACTED]")
 
+    def test_url_userinfo_redaction_is_valid_and_idempotent(self):
+        from artifact_bridge.errors import redact_text
+
+        raw = "https://owner:URL-PASSWORD@example.invalid/object?signature=SECRET#part"
+        once = redact_text(raw)
+
+        self.assertEqual(
+            once,
+            "https://redacted@example.invalid/object?[REDACTED]#[REDACTED]",
+        )
+        self.assertEqual(redact_text(once), once)
+        self.assertNotIn("URL-PASSWORD", once)
+        self.assertNotIn("SECRET", once)
+
     def test_default_fetch_resolves_live_to_one_exact_request(self):
         adapter = FakeAdapter()
         fetched = BridgeClient([adapter]).fetch(SLUG)
@@ -956,7 +970,11 @@ class StoreAndCliTests(unittest.TestCase):
                 return real_open(path, flags, mode, dir_fd=dir_fd)
 
             with mock.patch("artifact_bridge.store.os.open", side_effect=racing_open):
-                with self.assertRaises(UnsafePathError):
+                # Linux may immediately reuse the removed directory's inode,
+                # in which case the non-empty replacement is classified as a
+                # collision rather than an unsafe-path swap.  Both outcomes
+                # fail closed and preserve the replacement.
+                with self.assertRaises((UnsafePathError, CollisionError)):
                     store.write(
                         [adapter.fetch(ArtifactRef("owner", SLUG), "v1")], output
                     )

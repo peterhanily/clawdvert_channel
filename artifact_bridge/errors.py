@@ -28,6 +28,7 @@ _PEM_MARKERS = re.compile(
 )
 _HTTP_URL = re.compile(r'''(?i)\bhttps?://[^\s<>"']+''')
 _URL_TRAILING_PUNCTUATION = ".,;!)}"
+_REDACTED_URL_USERINFO = "redacted"
 
 
 def _redact_url_credentials(text: str) -> str:
@@ -58,7 +59,12 @@ def _redact_url_credentials(text: str) -> str:
             except ValueError:
                 port = None
             host_port = hostname + ((":" + str(port)) if port is not None else "")
-            netloc = "[REDACTED]@" + host_port
+            # Keep the replacement valid URL userinfo.  Square brackets are
+            # reserved for IP literals in a URL authority, so a value such as
+            # ``[REDACTED]@host`` is rejected by newer urlsplit versions on a
+            # second sanitisation pass.  A valid placeholder makes redaction
+            # idempotent across supported Python versions.
+            netloc = _REDACTED_URL_USERINFO + "@" + host_port
         sanitized = urlunsplit(
             (
                 parsed.scheme,

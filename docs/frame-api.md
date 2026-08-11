@@ -472,7 +472,7 @@ together with the current contract version.
 | `frames[?limit=&rel=]` | GET | list; `rel` is server side, no pagination |
 | `<slug>[?via=model_read]` | GET | the boot record: `perm`, `live`, `history`, tokens |
 | `<slug>` | DELETE | 204 |
-| `read/<slug>` | GET | stored declaration and content read-back |
+| `read/<slug>` | GET | current stored contract/capability declaration read-back; not content |
 | `perm/<slug>?org=` | PATCH | visibility. No GET, returns 405 |
 | `versions/<uuid>[?org=]` | GET | owner only: `{live, shared, history, versions, last_edit}` |
 | `share-key/<slug>/rotate` | POST | "Reset link", does not kill vanity links |
@@ -502,6 +502,14 @@ is no appeal affordance anywhere in the viewer bundle.
 Slug bookkeeping is entirely yours. The CLI's path-to-slug and slug-to-state maps are plain
 in-memory `Map`s in a module closure, with nothing on disk. Persist the source path, slug, live
 version, `perm.version`, contract and capabilities yourself.
+
+Despite its name, `GET /api/frame/read/<slug>` is not a source-download endpoint. In Claude Code
+2.1.227 the client accepts a required `contract` string and an optional or null `capabilities`
+object from this route. It supplies neither a version selector nor a version/content field, and the
+client uses it only to preserve the artifact's current stored capability declaration when
+republishing. It therefore cannot recover an immutable version's authored HTML. Use the content
+origin only as a `served` representation; provider runtime injection means those bytes must not be
+relabeled as stored source.
 
 The tokens in a frame record are credentials, not metadata. `assetToken` is a structured bearer
 capability lasting about an hour, carried as `?__frame_t=` on the content iframe, and the viewer

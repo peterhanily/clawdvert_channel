@@ -31,7 +31,7 @@ export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-${TMPDIR:-/tmp}/clawdvert-pyc
 echo "python"
 while IFS= read -r f; do
   if err=$("$PY" -m py_compile "$f" 2>&1); then ok "$f parses"; else bad "$f" "$err"; fi
-done < <(find clawdvert artifact_bridge tests skills -type f -name '*.py' 2>/dev/null | sort)
+done < <(find clawdvert artifact_bridge artifactfs tests skills -type f -name '*.py' 2>/dev/null | sort)
 if err=$("$PY" tests/test_mailbox.py 2>&1); then
   ok "offline test suite ($(echo "$err" | grep -c '  pass') cases)"
 else
@@ -50,6 +50,13 @@ if [ -d artifact_bridge ]; then
     ok "artifact bridge CLI loads"
   else
     bad "artifact bridge CLI" "$(echo "$err" | tail -8)"
+  fi
+fi
+if [ -d artifactfs ]; then
+  if err=$("$PY" -m artifactfs --help 2>&1); then
+    ok "ArtifactFS CLI loads"
+  else
+    bad "ArtifactFS CLI" "$(echo "$err" | tail -8)"
   fi
 fi
 if [ -f skills/clawdvert/scripts/relay_check.py ]; then

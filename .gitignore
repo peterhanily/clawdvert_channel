@@ -28,6 +28,11 @@ gitleaks-report.*
 # Files received over the mailbox channel.
 inbox/
 
+# ArtifactFS snapshots may contain complete local workspace contents; journals
+# contain provider-bound recovery metadata. Keep both as local runtime state.
+*.artifactfs.json
+*.artifactfs.jsonl
+
 # The virtualenv pins a newer cryptography than most systems ship.
 .venv/
 venv/

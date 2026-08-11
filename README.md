@@ -4,6 +4,9 @@ A research toolkit for working with Claude Artifacts: inspect and preserve exact
 versions, publish controlled applications, test browser boundaries, and prototype
 communication paths that operate within the Artifact environment.
 
+For a project overview and demonstration, read the
+[Caddy Labs article on clawdvert_channel](https://caddylabs.io/blog/clawdvert-channel/).
+
 This is one toolkit, not one hosted service. Its command-line tools, browser
 fixtures, relay, and research notes are separate instruments around the same
 subject: how Claude Artifacts are created, served, isolated, and connected.
@@ -73,6 +76,25 @@ See [Artifact Bridge](docs/artifact-bridge.md).
 Publishing changes provider state. New Artifacts are private; public visibility is
 a separate, version-specific operation. See the measured
 [Frame API reference](docs/frame-api.md).
+
+### Mount a Code Artifact without rendering it
+
+ArtifactFS provides an experimental, locally private, read-only filesystem view
+of one exact Code Artifact version. It exposes the provider-served page as
+`served.html` plus sanitized version metadata, without opening or executing the
+Artifact in a browser.
+
+```bash
+.venv/bin/pip install -r requirements-fuse.txt
+.venv/bin/python -m artifactfs mount-code '<code-artifact-url-or-uuid>' \
+  /path/to/empty-mountpoint --version '<exact-version-id>'
+```
+
+The reference may be an owned Artifact or an anonymously readable public
+Artifact; the local mount remains readable only by the invoking user. The
+current prototype intentionally does not write or delete remote Artifacts.
+See [ArtifactFS](docs/artifactfs.md) for platform requirements, the mounted
+layout, and the guarded path toward a versioned write-back workspace.
 
 ### Publish a standard chat Artifact
 
@@ -169,6 +191,7 @@ These are research prototypes, not a general messaging service.
 ## Documentation
 
 - [Artifact Bridge command and trust model](docs/artifact-bridge.md)
+- [ArtifactFS immutable filesystem mount](docs/artifactfs.md)
 - [Standard Artifact publisher](docs/standard-artifact-publisher.md)
 - [Claude Code Frame API observations](docs/frame-api.md)
 - [Private Artifact mailbox protocol](docs/mailbox.md)

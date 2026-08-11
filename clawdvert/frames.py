@@ -352,6 +352,76 @@ def content(session, slug, ver, asset_token=None):
         conn.close()
 
 
+def _matches_exact_authored_page(served, expected_page, ver):
+    """Accept only measured provider wrapping around an otherwise exact page."""
+
+    exact_authored_page = served.endswith(expected_page)
+    if not exact_authored_page:
+        head = expected_page.find("<head")
+        composed_head = expected_page.startswith("<!doctype html><html><head")
+        split = head + len("<head") if head >= 0 and composed_head else -1
+        tail = expected_page[split:] if split >= 0 else ""
+        if (
+            split >= 0
+            and tail
+            and served.startswith(expected_page[:split])
+            and served.endswith(tail)
+        ):
+            runtime = served[split:-len(tail)]
+            runtime_start = (
+                f'><!-- frame-runtime --><base href="/_f/{ver}/">'
+                '<script>window.__FRAME_PREAMBLE='
+            )
+            exact_authored_page = (
+                len(runtime.encode("utf-8")) <= 262144
+                and runtime.startswith(runtime_start)
+                and runtime.endswith("</script><!-- /frame-runtime --")
+            )
+    return exact_authored_page
+
+
+def _validate_exact_content_inputs(slug, ver, expected_page):
+    if not isinstance(slug, str) or not SLUG_RE.fullmatch(slug):
+        raise FrameError("publish returned an invalid artifact slug")
+    if not isinstance(ver, str) or not ver or len(ver) > 256:
+        raise FrameError("publish returned an invalid artifact version")
+    if not isinstance(expected_page, str):
+        raise FrameError("expected published content must be text")
+
+
+def verify_exact_published_content(session, slug, ver, expected_page):
+    """Bind one deploy response to its exact authored page before reporting success.
+
+    The content origin adds a provider-owned runtime. Older responses placed it
+    before the complete authored document. The current response inserts it at
+    the opening ``<head>`` boundary. In both cases every authored byte must be
+    present in order and without substitution; only that one measured runtime
+    insertion is tolerated.
+    """
+
+    _validate_exact_content_inputs(slug, ver, expected_page)
+    record = boot(session, slug)
+    live = record.get("live") or record.get("ver")
+    if live != ver:
+        raise FrameError("published version is not the artifact's exact live version")
+    served = content(session, slug, ver, record.get("assetToken"))
+    if not _matches_exact_authored_page(served, expected_page, ver):
+        raise FrameError("published content did not match the exact composed page")
+    return True
+
+
+def verify_exact_public_content(slug, ver, expected_page, timeout=20):
+    """Require the anonymous content origin to serve the exact authored page."""
+
+    from types import SimpleNamespace
+
+    _validate_exact_content_inputs(slug, ver, expected_page)
+    served = content(SimpleNamespace(timeout=timeout), slug, ver)
+    if not _matches_exact_authored_page(served, expected_page, ver):
+        raise FrameError("public content did not match the exact composed page")
+    return True
+
+
 def is_public(slug, ver):
     """Ask the content origin without credentials. This is the CLI's own test."""
     host = CONTENT_HOST.format(slug=slug)

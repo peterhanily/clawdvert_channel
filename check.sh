@@ -37,12 +37,12 @@ if err=$("$PY" tests/test_mailbox.py 2>&1); then
 else
   bad "offline test suite" "$(echo "$err" | tail -3)"
 fi
+if err=$("$PY" -m unittest discover -s tests -p 'test_*.py' 2>&1); then
+  ok "complete Python unittest suite"
+else
+  bad "complete Python unittest suite" "$(echo "$err" | tail -12)"
+fi
 if [ -d artifact_bridge ]; then
-  if err=$("$PY" -m unittest discover -s tests -p 'test_artifact_bridge*.py' 2>&1); then
-    ok "artifact bridge test suite"
-  else
-    bad "artifact bridge test suite" "$(echo "$err" | tail -8)"
-  fi
   if err=$("$PY" -m artifact_bridge --help 2>&1); then
     ok "artifact bridge CLI loads"
   else
@@ -182,8 +182,22 @@ if have node && [ -f realm/tools/build-auto-answer-bundle.mjs ]; then
 fi
 
 echo
+echo "relay"
+if [ -f realm/relay/package.json ]; then
+  if have npm; then
+    if err=$(npm --prefix realm/relay test 2>&1); then
+      ok "relay npm test suite"
+    else
+      bad "relay npm test suite" "$(echo "$err" | tail -12)"
+    fi
+  else
+    bad "relay npm test suite" "npm is required to run realm/relay tests"
+  fi
+fi
+
+echo
 echo "prose"
-for f in README.md docs/*.md skills/*/*.md skills/*/references/*.md; do
+for f in README.md SECURITY.md PRIVACY.md docs/*.md skills/*/*.md skills/*/references/*.md; do
   [ -e "$f" ] || continue
   n=$(grep -c '—' "$f")
   if [ "$n" -eq 0 ]; then
@@ -195,6 +209,13 @@ done
 
 echo
 echo "hygiene"
+for boundary in LICENSE SECURITY.md PRIVACY.md; do
+  if [ -f "$boundary" ]; then
+    ok "$boundary release boundary exists"
+  else
+    bad "$boundary release boundary" "required root document is missing"
+  fi
+done
 tracked_credentials=$(git ls-files | grep -E '(^|/)(relay\.json|\.relay-state\.json|\.credentials\.json|\.claude\.json|id_rsa|id_ed25519)$|\.(pem|key|p12|pfx|jks|keystore)$|(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)
 if [ -n "$tracked_credentials" ]; then
   bad "a credential file is tracked" "$tracked_credentials"

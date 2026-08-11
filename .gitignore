@@ -13,6 +13,8 @@ relay.json
 !.env.example
 .credentials.json
 .claude.json
+.native-session-ref
+*.native-session-ref
 *.pem
 *.key
 *.p12

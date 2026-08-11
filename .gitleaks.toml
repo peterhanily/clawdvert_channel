@@ -2,6 +2,14 @@
 useDefault = true
 
 [[allowlists]]
+description = "Ignored generated dependency and bytecode directories"
+paths = [
+  '''(^|/)__pycache__/''',
+  '''(^|/)node_modules/''',
+  '''^\.venv/''',
+]
+
+[[allowlists]]
 description = "Public codec size arithmetic is not a token value"
 targetRules = ["generic-api-key"]
 condition = "AND"

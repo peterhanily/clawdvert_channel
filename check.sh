@@ -40,7 +40,10 @@ fi
 if err=$("$PY" -m unittest discover -s tests -p 'test_*.py' 2>&1); then
   ok "complete Python unittest suite"
 else
-  bad "complete Python unittest suite" "$(echo "$err" | tail -12)"
+  # Keep enough context to show the actual traceback on remote matrix jobs.
+  # The final lines often belong to a later noisy test helper rather than the
+  # failing unittest itself.
+  bad "complete Python unittest suite" "$(echo "$err" | tail -100)"
 fi
 if [ -d artifact_bridge ]; then
   if err=$("$PY" -m artifact_bridge --help 2>&1); then
